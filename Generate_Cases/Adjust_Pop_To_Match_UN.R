@@ -1,5 +1,5 @@
 ### NOTE ###
-# Adjust Population Dataframe (Map) to match with Quan (orginal from UN but adjusted for some subnation) and UN data
+# Adjust Population Dataframe (Map) to match with Quan (orginal also from UN but adjusted for some subnation regions in RUS, PAK, AUS) and UN data
 # CHN = CHN + MAC (as mapping MAC, idx = 14, is inside CHN)
 # ratio = alternative / Duy --> adjusted pop = Duy * ratio
 ### ---- ###

@@ -1,5 +1,14 @@
 JERFOUCRU --- README FIRST
 
+$$ SUMMARY $$
+The entire project is divided into 3 parts
+1. Training Random Forest: This part includes functions to preprocess data (adjust CRS, calibrate coordinates, ...), create train-validate-test set, perform Overlay and EM disaggregate, training model (on python), and other supporting functions to visualize
+2. Generate Cases: This part includes functions to generate cases at pixel levels and country-wide levels. It also contains functions to adjust the population data (from the mapping to match with UN data)
+3. Comparing with WHO Incidence Grouping (WHO-IG): The last part comprises functions visualizing the cases (or population, etc) between RF and WHO-IG data
+
+$$ SUPPORTED LIBRARY $$
+Need to install the following libraries: sp, raster, rgdal, tidyverse, ggplot2
+
 ~~~~~~~~~~~~~~~~~~~~~~~ TRAINING RANDOM FOREST ~~~~~~~~~~~~~~~~~~~~~~~
 
 ========== Work Flow ==========
@@ -42,10 +51,10 @@ Note: These steps will extrapolate values at each new coordinate by using 2 give
 4. Generate cases at each pixel (Now we have FOI and age-distribution population at each pixel)
 
 ========== Functions ==========
-- Convert_Quan_30_to_25: Take the age distribution population data from Quan data and only keep data in the year 2015. Meanwhile, also remove some regions that Quan did not use to generate cases
+- Extract_Age_Distribution_Population: Take the age distribution population data from Quan data and only keep data in the year 2015. Meanwhile, also remove some regions that Quan did not use to generate cases
 - Assign_Endemic_Regions: assign a country index for each pixel to indicate which countries that the pixel belongs to → The results will be saved as 2 files: Coord_Regions_Final.Rds and Country_Index.Rds
 - Adjust_Pop_To_Match_UN: Calibrate population data from map (store in a dataframe of RF) to match with the UN population. Note that for countries that endemic areas are entire countries, we will match with the UN data, however for countries that endemic areas are a part of their countries we will match with the Quan’s subnational data (PAK, RUS, AUS) → The result will be saved as Adjusted_Pop_Map.Rds
-- Generate_Cases_DF_v2: Generate cases at each pixel at each ages from 0 to 99 → The result will be 101 Rds files. Each file is the cases at 1 age, the last file is the total cases of all age group (Sum of 100 previous files)
+- Generate_Cases_Dataframe: Generate cases at each pixel at each ages from 0 to 99 → The result will be 101 Rds files. Each file is the cases at 1 age, the last file is the total cases of all age group (Sum of 100 previous files)
 - Generate_Cases_Map: Convert above 101 Rds files into 101 raster maps (but we should only plot the total cases of all ages at each pixel). This function is just the same as <Create_Raster_From_Dataframe> but more specific to plot a Rds file.
 - Generate_Cases_Map_Country: Plot the shapefile map (not raster) in which values representing for each country is the total cases of entire country
 
