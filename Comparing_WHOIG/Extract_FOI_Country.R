@@ -1,5 +1,8 @@
 # NOTE #
-# Extract values of entire map based on their countries
+# Extract FOI of entire map based on their countries and compare with WHO-IG
+# Visualize in both density and boxplot
+# Note that WHO-IG dont have HKG (may be included in CHN)
+# Plot and save file
 # ---- #
 
 library(ggplot2)
@@ -50,7 +53,7 @@ names(result.country)[17] <- 'NPL'
 result.country$MAC <- NULL
 result.country$High.NPL <- NULL
 
-##### Compare to VIMC Posterior #####
+##### Compare to VIMC Posterior: Only some countries required by VIMC #####
 # LinkData <- '~/DuyNguyen/RProjects/Rstan_Quan/Result Posterior/Dec06/'
 # Listdata <- list.files(LinkData)
 # ListCountries <- substr(Listdata, 15, 17)

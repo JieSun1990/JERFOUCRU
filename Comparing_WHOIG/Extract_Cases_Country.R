@@ -1,5 +1,5 @@
 # NOTE #
-# Extract and compare cases between RF and MOdelling
+# Extract and compare cases between RF and WHO-IG
 # ---- #
 
 library(ggplot2)
@@ -62,9 +62,6 @@ for (i in 1 : length(Cases.mod)){
     Cases.mod[[i]] <- as.numeric(Cases.mod[[i]][,66])
 }
 
-# Cases.mod <- readRDS("~/DuyNguyen/RProjects/OUCRU JE/Compare Values/no_vac_cases_gen_age_sum_or_Adjust.Rds") # year 2015 (Adjust pop to match with SEDAC) --> 1600 values for 1600 FOI posteriors
-
-
 # Adjust Low.CHN, High.CHN
 Cases.mod$CHN <- Cases.mod$Low.CHN + Cases.mod$High.CHN
 Cases.mod$Low.CHN <- NULL
@@ -106,7 +103,7 @@ df$mod <- round(df$mod)
 # lv <- c('AUS', 'BRN', 'BTN', 'TLS', 'RUS', 'SGP', 'LAO', 'PNG', 'KHM',
 #         'LKA', 'PRK', 'TWN', 'NPL', 'MYS', 'PAK', 'KOR', 'MMR', 'THA', 'VNM',
 #         'PHL', 'JPN', 'BGD', 'IDN', 'IND', 'CHN')
-df$country <- factor(df$country, levels = unique(df$country[order(df$mod)]), ordered = TRUE) # order based on mod values
+df$country <- factor(df$country, levels = unique(df$country[order(df$mod)]), ordered = TRUE) # order based on modelling values (WHO-IG)
 # df$country <- factor(df$country, levels = lv, ordered = TRUE) # order based on mod values
 
 df_long <- gather(df, method, cases, mod, map, factor_key = TRUE)
@@ -114,54 +111,19 @@ colnames(df_long) <- c('Country', 'Method', 'Cases')
 df_long$Method <- as.character(df_long$Method)
 df_long$Method[which(df_long$Method == 'mod')] <- 'WHO-IG'
 df_long$Method[which(df_long$Method == 'map')] <- 'Mapping'
-##### PLOT #####
-## function helping to remove part of y axis
-# trans <- function(x, fr = 25) {
-#     c(x[x <= fr], fr + (0.05 * x[x > fr]))
-# }
-# yticks <- c(0, 10, 100, 500, 1000, 2500, 5000, 10000, 15000, 40000, 60000)
-# df_long$cases_new <- 0
-# for (i in 1 : nrow(df_long)){
-#     df_long$cases_new[i] <- trans(df_long$cases[i], 500)
-# }
-# p <- ggplot(df_long, aes(x = country, y = cases_new, fill = method)) + geom_bar(stat = 'identity', position = position_dodge())
-# p <- p + geom_rect(aes(xmin = 0, xmax = 26, ymin = 500, ymax = 510), fill = 'white')
-# p <- p + scale_y_continuous(limits = c(0, NA), breaks = trans(yticks, 500), labels = yticks)
-# p <- p + theme(axis.text.x = element_text(angle = 90))
-
-
-p <- ggplot(df_long, aes(x = Country, y = Cases, fill = Method)) + geom_bar(stat = 'identity', position = position_dodge())
-p <- p + theme(axis.text.x = element_text(angle = 90))
-# p <- p + scale_fill_manual(values=c('#999999','#E69F00'))
-p
-
-df$dif <- df$mod - df$map
-df$percentage <- df$dif / df$mod * 100
-
 
 ##### SUBPLOT #####
+# Divided Manually based on the cases --> divided into subgroup in order to make easier to see the plot (y-axis varies alot between countries)
 part1 <- levels(df$country)[1 : 6]
 part2 <- levels(df$country)[7 : 17]
 part3 <- levels(df$country)[18 : 23]
 part4 <- levels(df$country)[24 : 25]
-
-# part1 <- c('AUS', 'BRN', 'BTN', 'TLS')
-# part2 <- c('RUS', 'SGP', 'LAO', 'PNG', 'KHM')
-# part3 <- c('LKA', 'PRK', 'TWN', 'NPL', 'MYS', 'PAK', 'KOR', 'MMR', 'THA', 'VNM')
-# part4 <- c('PHL', 'JPN', 'BGD', 'IDN')
-# part5 <- c('IND', 'CHN')
-
-# df_long_p1 <- df_long[which(df_long$country %in% part1), ]
-# df_long_p2 <- df_long[which(df_long$country %in% part2), ]
-# df_long_p3 <- df_long[which(df_long$country %in% part3), ]
-# df_long_p4 <- df_long[which(df_long$country %in% part4), ]
 
 df_long$Part <- 0
 df_long$Part[which(df_long$Country %in% part1)] <- 1
 df_long$Part[which(df_long$Country %in% part2)] <- 2
 df_long$Part[which(df_long$Country %in% part3)] <- 3
 df_long$Part[which(df_long$Country %in% part4)] <- 4
-# df_long$Part[which(df_long$Country %in% part5)] <- 5
 
 color <- c("#009E73", "#CC79A7")
 names(color) <- c('WHO-IG', 'Mapping')
@@ -169,9 +131,10 @@ colscale <- scale_fill_manual(name = 'Method', values = color)
 
 p <- ggplot(df_long, aes(x = Country, y = Cases, fill = Method)) + 
     geom_bar(stat = 'identity', position = position_dodge(), alpha = 0.75) + colscale
-p <- p + theme(axis.text.x = element_text(angle = 90))
 p <- p + facet_wrap(~Part, scale = 'free_y', ncol = 1)
+p <- p + theme(axis.text.x = element_text(angle = 90))
 p <- p + ggtitle('Case Compare Mapping vs WHO Incidence Group') +  xlab('Countries') + ylab('Cases')
 p
 
-ggsave(filename = 'Cases_Comparison.png', width = 108*2.5, height = 72*2.5, units = 'mm', plot = p)
+# SAVE FILE
+# ggsave(filename = 'Cases_Comparison.png', width = 108*2.5, height = 72*2.5, units = 'mm', plot = p)
