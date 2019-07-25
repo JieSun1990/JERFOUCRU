@@ -4,10 +4,16 @@
 # ratio = alternative / Duy --> adjusted pop = Duy * ratio
 ### ---- ###
 
+# Get directory of the script (this part only work if source the code, wont work if run directly in the console)
+# This can be set manually !!!
+script.dir <- dirname(sys.frame(1)$ofile)
+script.dir <- paste0(script.dir, '/')
+setwd(script.dir)
+
 ##### Create dataframe of population from UN Excel ####
 # Read Country index data #
-Country_Index <- readRDS("~/DuyNguyen/RProjects/OUCRU JE/Generate_Case_Map/Country_Index.Rds") # index of countries
-Coord_Regions_Final <- readRDS("~/DuyNguyen/RProjects/OUCRU JE/Generate_Case_Map/Coord_Regions_Final.Rds") # index of pixel
+Country_Index <- readRDS("Generate/Country_Index.Rds") # index of countries
+Coord_Regions_Final <- readRDS("Generate/Coord_Regions_Final.Rds") # index of pixel
 
 # Combine Low.NPL and High.NPL into 1 NPL
 pop.UN <- data.frame(Country = Country_Index, Pop = 0)
@@ -51,11 +57,13 @@ pop.UN <- pop.UN[-idx_MAC, ]
 
 
 ##### Read pop from Quan Data (also from UN, but adjust to match subnational regions) ####
-pop_data1 <- readRDS("~/DuyNguyen/JE_model_Quan/data/population/Naive_pop_24ende_1950_2015.rds")
+# pop_data1 <- readRDS("JE_model_Quan/data/population/Naive_pop_24ende_1950_2015.rds")
+pop_data1 <- readRDS("Data/Naive_pop_24ende_1950_2015.rds") # Population by age at each region
 pop_data1 <- pop_data1[ ,c(1, which(colnames(pop_data1) == 'X2015'))]
 pop_data1$region <- as.character(pop_data1$region)
-foi_data1 <- readRDS("~/DuyNguyen/JE_model_Quan/results/areas_lambda/ende_24_regions_lambda_extr_or.rds")
-select_region <- c(1:6, 11:15, 19:24, 28:30, 32:40, 48) # Quan decision
+# foi_data1 <- readRDS("JE_model_Quan/results/areas_lambda/ende_24_regions_lambda_extr_or.rds")
+foi_data1 <- readRDS("Data/ende_24_regions_lambda_extr_or.rds") # FOI result from catalytic models at each region
+select_region <- c(1:6, 11:15, 19:24, 28:30, 32:40, 48) # regions that we considered in endemic areas
 select_region <- as.character(foi_data1$region[select_region])
 pop_data1 <- pop_data1[which(pop_data1$region %in% select_region),]
 
@@ -106,7 +114,7 @@ colnames(pop.Q) <- c('Country', 'Pop')
 rm(foi_data1, pop_data1)
 
 ##### Read Pop from the Duy dataframe (imputed in the randomforest dataset) #####
-Endemic_DF_WP_Imputed_Land <- readRDS("~/DuyNguyen/RProjects/OUCRU JE/Data JE/Data_RF/Endemic_DF_WP_Full_Cov_Imputed_Land.Rds")
+Endemic_DF_WP_Imputed_Land <- readRDS("Data/Endemic_DF_WP_Full_Cov_Imputed_Land.Rds") # dataframe containing all imputed features (no missing values here)
 idx_col_pop <- which(colnames(Endemic_DF_WP_Imputed_Land) == 'Pop_Count_WP_SEDAC_2015')
 df.pop <- Endemic_DF_WP_Imputed_Land[, c(1, 2, idx_col_pop)]
 rm(Endemic_DF_WP_Imputed_Land)
@@ -185,4 +193,4 @@ for (i in 1 : length(Country_Index)){
     }
 }
 ##### SAVE #####
-saveRDS(df.pop, 'Adjusted_Pop_Map.Rds')
+saveRDS(df.pop, 'Generate/Adjusted_Pop_Map.Rds')

@@ -3,10 +3,20 @@
 # The result will be age-distributed population in the year 2015 at each countries (total 25 countries)
 ### ---- ###
 
-pop_data1 <- readRDS("~/DuyNguyen/JE_model_Quan/data/population/Naive_pop_24ende_1950_2015.rds") # Read Population data collected by Quan
+# Get directory of the script (this part only work if source the code, wont work if run directly in the console)
+# This can be set manually !!!
+script.dir <- dirname(sys.frame(1)$ofile)
+script.dir <- paste0(script.dir, '/')
+setwd(script.dir)
+
+
+##### Read pop from Quan Data (also from UN, but adjust to match subnational regions) ####
+# pop_data1 <- readRDS("JE_model_Quan/data/population/Naive_pop_24ende_1950_2015.rds")
+pop_data1 <- readRDS("Data/Naive_pop_24ende_1950_2015.rds") # Read Population data collected by Quan
 pop_data1 <- pop_data1[ ,c(1, which(colnames(pop_data1) == 'X2015'))] # Take the year 2015
 pop_data1$region <- as.character(pop_data1$region)
-foi_data1 <- readRDS("~/DuyNguyen/JE_model_Quan/results/areas_lambda/ende_24_regions_lambda_extr_or.rds") # Read catalytic modelled FOI
+# foi_data1 <- readRDS("JE_model_Quan/results/areas_lambda/ende_24_regions_lambda_extr_or.rds")
+foi_data1 <- readRDS("Data/ende_24_regions_lambda_extr_or.rds") # Read catalytic modelled FOI
 select_region <- c(1:6, 11:15, 19:24, 28:30, 32:40, 48) # selected regions <-- Quan decision
 select_region <- as.character(foi_data1$region[select_region])
 pop_data1 <- pop_data1[which(pop_data1$region %in% select_region),]
@@ -35,4 +45,4 @@ for (country in countries_unique){
     pop_convert$X2015[idx_in_pop_convert] <- pop_temp
 }
 
-saveRDS(pop_convert, 'Naive_pop_24ende_1950_2015_Country.Rds')
+saveRDS(pop_convert, 'Generate/Naive_pop_24ende_2015_Country.Rds')

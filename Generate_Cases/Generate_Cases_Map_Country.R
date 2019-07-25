@@ -7,6 +7,15 @@ library(sp)
 library(raster)
 library(rgdal)
 
+# Get directory of the script (this part only work if source the code, wont work if run directly in the console)
+# This can be set manually !!!
+script.dir <- dirname(sys.frame(1)$ofile)
+script.dir <- paste0(script.dir, '/')
+setwd(script.dir)
+# Create folder to store the generated SHP result (will show warnings if the folder already exists --> but just warning, no problem)
+dir.create(file.path('Generate/Cases_SHP/'), showWarnings = TRUE)
+
+
 ##### CREATE SHP FILE #####
 create_raster_from_df <- function(dataframe, res = c(5, 5),
                                   crs = "+proj=eqc +lat_ts=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=km +no_defs",
@@ -21,17 +30,17 @@ create_raster_from_df <- function(dataframe, res = c(5, 5),
 crs_new <- crs("+proj=eqc +lat_ts=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=km +no_defs")
 
 # Read data regions DF
-df.regions <- readRDS('~/DuyNguyen/RProjects/OUCRU JE/Generate_Case_Map/Coord_Regions_Final.Rds')
+df.regions <- readRDS('Generate/Coord_Regions_Final.Rds')
 
 # Read SHP File of endemic area
-region.shp <- readOGR('/home/duynguyen/DuyNguyen/RProjects/OUCRU JE/Data JE/Map_Endemic_v3/Ende_map_feed.shp')
+region.shp <- readOGR('Data/Shapefile_Endemic/Ende_map_feed.shp')
 countries <- region.shp@data$Country
 countries <- as.character(countries) # countries in endemic areas
 
 # Read data
-LinkData <- '~/DuyNguyen/RProjects/OUCRU JE/Generate_Case_Map/Data_Cases/'
+LinkData <- 'Generate/Cases/'
 ListFiles <- list.files(LinkData)
-idx_file <- 101 # Total cases of all age group
+idx_file <- length(ListFiles) # Total cases of all age group
 df <- readRDS(paste0(LinkData, ListFiles[idx_file]))
 
 region.shp@data$Cases <- 0
@@ -45,7 +54,7 @@ for (idx_country in 1 : length(countries)){
     }
 }
 
-writeOGR(region.shp, ".", "Cases_SHP", driver="ESRI Shapefile")
+writeOGR(region.shp, ".", "Generate/Cases_SHP/Total_Cases_SHP", driver="ESRI Shapefile")
 
 ##### COMPARE WITH VIMC: Comparing with the result of VIMC templates we ran last year #####
 # vimc <- read.csv("~/DuyNguyen/RProjects/Rstan_Quan/Template_Generate/2017gavi6/MeanCases/naive_2017gavi6.csv")

@@ -7,14 +7,23 @@ library(sp)
 library(raster)
 library(rgdal)
 
-# Read FOI Map file <-- Result after running Randomforest
-df.csv <- read.csv('/home/duynguyen/DuyNguyen/PythonProjects/OUCRU_JE/Result with Coor/EM/RescaleTVT_Once/Land/Endemic_result_Full_Cov_TVT_Land_400.csv', sep = '\t')
+# Get directory of the script (this part only work if source the code, wont work if run directly in the console)
+# This can be set manually !!!
+script.dir <- dirname(sys.frame(1)$ofile)
+script.dir <- paste0(script.dir, '/')
+setwd(script.dir)
+
+# Create folder to store the result (will show warnings if the folder already exists --> but just warning, no problem)
+dir.create(file.path('Generate'), showWarnings = TRUE)
+
+# # Read FOI Map file <-- Result after running Randomforest
+df.csv <- read.csv('Data/Endemic_result_Full_Cov_TVT_Land_400.csv', sep = '\t')
 df.csv <- df.csv[, -1]
 df.foi <- df.csv[, c(1, 2)]
 rm(df.csv)
 
 # Read SHP File of endemic area <-- Shapefile that indicates the endemic areas
-region.shp <- readOGR('/home/duynguyen/DuyNguyen/RProjects/OUCRU JE/Data JE/Map_Endemic_v3/Ende_map_feed.shp')
+region.shp <- readOGR('Data/Shapefile_Endemic/Ende_map_feed.shp')
 countries <- region.shp@data$Country
 countries <- as.character(countries) # countries in endemic areas
 
@@ -56,5 +65,5 @@ if(length(idx_non_regions) > 0){
         }
     }
 }
-saveRDS(df.foi, 'Coord_Regions_Final.Rds') # index of each pixel (dataframe with 3 columns: x, y (coordinates), regions (index))
-saveRDS(countries, 'Country_Index.Rds') # label of index (index = 1 --> country 'AUS', ...)
+saveRDS(df.foi, 'Generate/Coord_Regions_Final.Rds') # index of each pixel (dataframe with 3 columns: x, y (coordinates), regions (index))
+saveRDS(countries, 'Generate/Country_Index.Rds') # label of index (index = 1 --> country 'AUS', ...)
