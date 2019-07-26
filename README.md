@@ -14,7 +14,7 @@ Each folder will have similar structure:
 #### SUPPORTED LIBRARY
 Need to install the following libraries: sp, raster, rgdal, tidyverse, ggplot2, dplyr, tidyr, Rcpp (this is optional), rgeos, grid, gridExtra
 
-## TRAINING RANDOM FOREST
+## PART 1. TRAINING RANDOM FOREST
 
 ### Work Flow 
 1. Download TIF file from the internet
@@ -50,7 +50,7 @@ Note: These steps will extrapolate values at each new coordinate by using 2 give
 - **Create_Raster_From_Dataframe**
 
 
-## GENERATE CASES 
+## PART 2. GENERATE CASES 
 This folder includes scripts, Data folder and Generate folder.
 1. **_Data_** folder includes data that is needed to run the scripts
 - Modelled FOI distribution from MCMC (WHO-IG)
@@ -79,9 +79,9 @@ This folder includes scripts, Data folder and Generate folder.
 - **Generate_Cases_Map**: Convert above 101 Rds files into 101 raster maps (but we should only plot the total cases of all ages at each pixel). This function is just the same as **Create_Raster_From_Dataframe** but more specific to plot a Rds file.
 - **Generate_Cases_Map_Country**: Plot the shapefile map (not raster) in which values representing for each country is the total cases of entire country
 
-## COMPARING WITH WHO INCIDENCE GROUPING
+## PART 3. COMPARING WITH WHO INCIDENCE GROUPING
 **_Please note that you can run this COMPARING part only after you did run the GENERATE CASES part._**
-Most of the data used for this part is from the **_GENERATE CASES_** part. Therefore there is no Data folder in this part. However there is a **_Quan_Result folder_**, which contains the generated cases WHO-IG did by Quan.
+<br/>Most of the data used for this part is from the **_GENERATE CASES_** part. Therefore there is no Data folder in this part. However there is a **_Quan_Result folder_**, which contains the generated cases WHO-IG did by Quan.
 
 ### Work Flow
 Most of this part is for visualizing the comparison between RF and WHO-IG (Population, FOI distribution, Cases). These following script is independent to each other, hence you can run it seperately.
