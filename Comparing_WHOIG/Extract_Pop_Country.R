@@ -4,10 +4,20 @@
 # Also add HKG to CHN (since WHO-IG dont have HKG, might be included in CHN also)
 # ---- #
 
-# library(sp)
-# library(raster)
-# library(rgdal)
-# library(rgeos)
+library(tidyr)
+
+cat('===== START [Extract_Pop_Country.R] =====\n')
+
+# Get directory of the script (this part only work if source the code, wont work if run directly in the console)
+# This can be set manually !!!
+script.dir <- dirname(sys.frame(1)$ofile)
+script.dir <- paste0(script.dir, '/')
+setwd(script.dir)
+
+# Create folder to store the result (will show warnings if the folder already exists --> but just warning, no problem)
+dir.create(file.path('Generate'), showWarnings = TRUE)
+
+LinkData <- '../Generate_Cases/' # Data folder is from the Generate_Cases part
 
 ##### Read Pop Map Data (Adjusted to match UN) #####
 # The 4 following lines is the RF population (not adjusted yet) --> if we want to compare the original RF pop, then use the 4 below lines
@@ -17,12 +27,12 @@
 # rm(Endemic_DF_WP_Imputed_Land)
 
 # Adjusted RF Pop
-df.pop <- readRDS('~/DuyNguyen/RProjects/OUCRU JE/Generate_Case_Map/Adjusted_Pop_Map.Rds')
+df.pop <- readRDS(paste0(LinkData, 'Generate/Adjusted_Pop_Map.Rds'))
 colnames(df.pop) <- c('x', 'y', 'Pop')
 
 # ##### Read Country index data #####
-Country_Index <- readRDS("~/DuyNguyen/RProjects/OUCRU JE/Generate_Case_Map/Country_Index.Rds") # index of countries
-Coord_Regions_Final <- readRDS("~/DuyNguyen/RProjects/OUCRU JE/Generate_Case_Map/Coord_Regions_Final.Rds") # index of pixel
+Country_Index <- readRDS(paste0(LinkData, "Generate/Country_Index.Rds")) # index of countries
+Coord_Regions_Final <- readRDS(paste0(LinkData, "Generate/Coord_Regions_Final.Rds")) # country index of each pixel
 
 ##### Read VIMC Pop data #####
 # # naive_pop_1950_2100_Dec06 <- read.csv("DuyNguyen/RProjects/Rstan_Quan/Data/VIMC new run deadline 21th dec/naive_pop_1950_2100_Dec06.csv")
@@ -65,10 +75,10 @@ Coord_Regions_Final <- readRDS("~/DuyNguyen/RProjects/OUCRU JE/Generate_Case_Map
 
 
 ##### Read WHO-IG Population Data (collected by Quan) #####
-pop_WHOIG <- readRDS("~/DuyNguyen/JE_model_Quan/data/population/Naive_pop_24ende_1950_2015.rds")
+pop_WHOIG <- readRDS(paste0(LinkData, "Data/Naive_pop_24ende_1950_2015.rds"))
 pop_WHOIG <- pop_WHOIG[ ,c(1, which(colnames(pop_WHOIG) == 'X2015'))]
 pop_WHOIG$region <- as.character(pop_WHOIG$region)
-foi_data1 <- readRDS("~/DuyNguyen/JE_model_Quan/results/areas_lambda/ende_24_regions_lambda_extr_or.rds")
+foi_data1 <- readRDS(paste0(LinkData, "Data/ende_24_regions_lambda_extr_or.rds"))
 select_region <- c(1:6, 11:15, 19:24, 28:30, 32:40, 48) # Quan decision
 select_region <- as.character(foi_data1$region[select_region])
 pop_WHOIG <- pop_WHOIG[which(pop_WHOIG$region %in% select_region),]
@@ -202,5 +212,7 @@ p <- p + theme(axis.text.x = element_text(angle = 90))
 p <- p + ggtitle('Population Compare Mapping vs WHO Incidence Group') +  xlab('Countries') + ylab('Population')
 p
 
+cat('===== FINISH [Extract_Pop_Country.R] =====\n')
+
 # SAVE FILE
-# ggsave(filename = 'Pop_Comparison.png', width = 108*2.5, height = 72*2.5, units = 'mm', plot = p)
+ggsave(filename = 'Generate/Pop_Comparison.png', width = 108*2.5, height = 72*2.5, units = 'mm', plot = p)

@@ -6,14 +6,28 @@
 library(Rcpp)
 library(dplyr)
 
-Link_Quan <- '~/DuyNguyen/JE_model_Quan/'
-ende_24_regions <- readRDS(paste0(Link_Quan, 'results/areas_lambda/ende_24_regions_lambda_extr_or.rds'))
+cat('===== START [Quan_Cases.R] =====\n')
 
-symp_rate_dist <- readRDS(paste0(Link_Quan, "data/uncertainty_quantities/symp_rate_dist.rds"))
-mort_rate_dist <- readRDS(paste0(Link_Quan, "data/uncertainty_quantities/mort_rate_dist.rds"))
+# Get directory of the script (this part only work if source the code, wont work if run directly in the console)
+# This can be set manually !!!
+script.dir <- dirname(sys.frame(1)$ofile)
+script.dir <- paste0(script.dir, '/')
+setwd(script.dir)
+
+# Create folder to store the result (will show warnings if the folder already exists --> but just warning, no problem)
+dir.create(file.path('Generate'), showWarnings = TRUE)
+
+# Read modelled FOI + symptomatic + mortality rate used by Quan
+# ende_24_regions <- readRDS('~/DuyNguyen/JE_model_Quan/results/areas_lambda/ende_24_regions_lambda_extr_or.rds')
+# symp_rate_dist <- readRDS("~/DuyNguyen/JE_model_Quan/data/uncertainty_quantities/symp_rate_dist.rds")
+# mort_rate_dist <- readRDS("~/DuyNguyen/JE_model_Quan/data/uncertainty_quantities/mort_rate_dist.rds")
+LinkData <- '../Generate_Cases/Data/'
+ende_24_regions <- readRDS(paste0(LinkData, 'ende_24_regions_lambda_extr_or.rds'))
+symp_rate_dist <- readRDS(paste0(LinkData, "symp_rate_dist.rds"))
+mort_rate_dist <- readRDS(paste0(LinkData, "mort_rate_dist.rds"))
 
 #Population data:
-all_region_pop <- readRDS(paste0(Link_Quan, "data/population/Naive_pop_24ende_1950_2015.rds"))
+all_region_pop <- readRDS(paste0(LinkData, "Naive_pop_24ende_1950_2015.rds"))
 all_region_pop <- all_region_pop[, c(1,67)] # take year 2015
 
 # all_region_pop <- readRDS('~/DuyNguyen/RProjects/OUCRU JE/Compare Values/Naive_pop_24ende_1950_2015_Adjust.rds')
@@ -57,7 +71,8 @@ no_vac_cases_gen_age_sum <- no_vac_cases_gen
 for (idx in 1 : length(no_vac_cases_gen_age_sum)){
     no_vac_cases_gen_age_sum[[idx]] <- rowSums(no_vac_cases_gen[[idx]])
 }
-saveRDS(no_vac_cases_gen_age_sum, 'no_vac_cases_gen_age_sum_or_Regenerated.Rds')
-# #save data:
-# save_data_path = "./results/cases_gen"
-# saveRDS(no_vac_cases_gen, paste(save_data_path, "/no_vac_cases_gen_",tag,".rds", sep = ""))
+
+cat('===== FINISH [Quan_Cases.R] =====\n')
+
+# Save generated file
+saveRDS(no_vac_cases_gen_age_sum, 'Generate/no_vac_cases_gen_age_sum_or_Regenerated_from_Quan.Rds')

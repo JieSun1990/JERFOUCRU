@@ -57,10 +57,10 @@ PSym_mean <- mean(PSym)
 vimc.pop$distribution <- 0
 countries <- unique(vimc.pop$country_code) # countries which are supported by VIMC
 for (country in countries){
-    idx_row <- which(vimc.pop$country_code == country)
-    pop_sum <- sum(vimc.pop$X2015[idx_row])
-    pop_distribute <- vimc.pop$X2015[idx_row] / pop_sum
-    vimc.pop$distribution[idx_row] <- pop_distribute
+  idx_row <- which(vimc.pop$country_code == country)
+  pop_sum <- sum(vimc.pop$X2015[idx_row])
+  pop_distribute <- vimc.pop$X2015[idx_row] / pop_sum
+  vimc.pop$distribution[idx_row] <- pop_distribute
 }
 
 ###### Create empty dataframe for age pop distribution (nrow = npixel, ncol = 100 agegroup + 2 coord) #####
@@ -71,27 +71,27 @@ df.popage$x <- df.foi$x
 df.popage$y <- df.foi$y
 
 for (i in 1 : length(Country_Idx)){
-    country <- Country_Idx[i]
-    cat('Processing', country, '\n')
-    if (country != 'MAC'){ # Do not run for MAC
-        idx_region <- which(df.regions$regions == i)
-        if (country == 'Low.NPL' || country == 'High.NPL'){
-            country <- 'NPL'
-        }
-        if (country == 'HKG'){ # Used age distribution of CHN and apply to HKG
-            country <- 'CHN'
-        }
-        idx_vimc_pop <- which(vimc.pop$country_code == country)
-        if (length(idx_vimc_pop) == 0){ # DO NOT HAVE VIMC POP DATA FOR THIS COUNTRY
-            for (idx_col in 3 : ncol(df.popage)){
-                df.popage[[idx_col]][idx_region] <- df.pop$Pop[idx_region] / 100 # equally portion for all 100 age groups
-            }
-        }else{ # HAVE VIMC POP DATA
-            for (idx_col in 3 : ncol(df.popage)){
-                df.popage[[idx_col]][idx_region] <- df.pop$Pop[idx_region] * vimc.pop$distribution[idx_vimc_pop[idx_col - 2]]
-            }
-        }
+  country <- Country_Idx[i]
+  cat('Processing', country, '\n')
+  if (country != 'MAC'){ # Do not run for MAC
+    idx_region <- which(df.regions$regions == i)
+    if (country == 'Low.NPL' || country == 'High.NPL'){
+      country <- 'NPL'
     }
+    if (country == 'HKG'){ # Used age distribution of CHN and apply to HKG
+      country <- 'CHN'
+    }
+    idx_vimc_pop <- which(vimc.pop$country_code == country)
+    if (length(idx_vimc_pop) == 0){ # DO NOT HAVE VIMC POP DATA FOR THIS COUNTRY
+      for (idx_col in 3 : ncol(df.popage)){
+        df.popage[[idx_col]][idx_region] <- df.pop$Pop[idx_region] / 100 # equally portion for all 100 age groups
+      }
+    }else{ # HAVE VIMC POP DATA
+      for (idx_col in 3 : ncol(df.popage)){
+        df.popage[[idx_col]][idx_region] <- df.pop$Pop[idx_region] * vimc.pop$distribution[idx_vimc_pop[idx_col - 2]]
+      }
+    }
+  }
 }
 
 ###### Find Cases for each pixels for each age group #####
@@ -102,7 +102,7 @@ colnames(df.casesage) <- headers
 df.casesage$x <- df.foi$x
 df.casesage$y <- df.foi$y
 for (i in 3 :  ncol(df.popage)){
-    df.casesage[[i]] <- (1 - exp(-1 * df.foi$Predict)) * exp(-1 * df.foi$Predict * (i - 3)) * PSym_mean * df.popage[[i]]
+  df.casesage[[i]] <- (1 - exp(-1 * df.foi$Predict)) * exp(-1 * df.foi$Predict * (i - 3)) * PSym_mean * df.popage[[i]]
 }
 df.casesage$Total <- rowSums(df.casesage[,3:102])
 # saveRDS(df.casesage, 'Cases_DF_Agegroup.Rds') # intensive file, large size --> dont recommend to save this file
@@ -110,7 +110,8 @@ df.casesage$Total <- rowSums(df.casesage[,3:102])
 # Save entire cases at each age group
 # If only want to save the total cases of all agegroup --> set i = ncol(df.casesage) --> remove the loop
 for (i in 3 : ncol(df.casesage)){
-    cat('Saving', colnames(df.casesage)[i], '\n')
-    df <- df.casesage[ ,c(1, 2, i)]
-    saveRDS(df, paste0('Generate/Cases/Cases_', colnames(df.casesage)[i], '.Rds'))
+  # i <- ncol(df.casesage)
+  cat('Saving', colnames(df.casesage)[i], '\n')
+  df <- df.casesage[ ,c(1, 2, i)]
+  saveRDS(df, paste0('Generate/Cases/Cases_', colnames(df.casesage)[i], '.Rds'))
 }

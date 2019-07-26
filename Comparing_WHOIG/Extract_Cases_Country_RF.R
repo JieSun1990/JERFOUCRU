@@ -6,6 +6,19 @@
 library(ggplot2)
 library(tidyr)
 
+cat('===== START [Extract_Cases_Country_RF.R] =====\n')
+
+# Get directory of the script (this part only work if source the code, wont work if run directly in the console)
+# This can be set manually !!!
+script.dir <- dirname(sys.frame(1)$ofile)
+script.dir <- paste0(script.dir, '/')
+setwd(script.dir)
+
+# Create folder to store the result (will show warnings if the folder already exists --> but just warning, no problem)
+dir.create(file.path('Generate'), showWarnings = TRUE)
+
+LinkData <- '../Generate_Cases/' # Data folder is from the Generate_Cases part
+
 Extract_Values_Country <- function(DF_Vals, DF_Coords, Index){
     # Extract values of entire map based on their countries
     # DF_Vals: Dataframe containing values in entire map
@@ -33,14 +46,14 @@ Extract_Values_Country <- function(DF_Vals, DF_Coords, Index){
     return(result)
 }
 
-# Read data
-LinkData <- '~/DuyNguyen/RProjects/OUCRU JE/Generate_Case_Map/Data_Cases/'
-ListFiles <- list.files(LinkData)
+# Read data from generated cases dataframe (from Generate Cases part)
+Link_Generate_Cases_DF <- paste0(LinkData, 'Generate/Cases/')
+ListFiles <- list.files(Link_Generate_Cases_DF)
 
 ##### Read Map data #####
-Country_Index <- readRDS("~/DuyNguyen/RProjects/OUCRU JE/Generate_Case_Map/Country_Index.Rds") # index of countries
-Coord_Regions_Final <- readRDS("~/DuyNguyen/RProjects/OUCRU JE/Generate_Case_Map/Coord_Regions_Final.Rds") # index of pixel
-Cases.map <- readRDS(paste0(LinkData, ListFiles[101])) # Take total cases (index 101)
+Country_Index <- readRDS(paste0(LinkData, "Generate/Country_Index.Rds")) # index of countries
+Coord_Regions_Final <- readRDS(paste0(LinkData, "Generate/Coord_Regions_Final.Rds")) # country index of each pixel
+Cases.map <- readRDS(paste0(LinkData, "Generate/Cases/", ListFiles[length(ListFiles)])) # Take total cases (index 101)
 
 Cases.map <- Extract_Values_Country(Cases.map, Coord_Regions_Final, Country_Index)
 # Fix Low.NPL and High.NPL
@@ -96,3 +109,8 @@ p <- p + theme(
 )
 
 p
+
+cat('===== FINISH [Extract_Cases_Country_RF.R] =====\n')
+
+# SAVE FILE
+ggsave(filename = 'Generate/Cases_RF.png', width = 108*2.5, height = 72*2.5, units = 'mm', plot = p)
