@@ -1,4 +1,5 @@
 ## NOTE ##
+# This script is a supported script (not really important and not complicated)
 # Used to create raster (TIF) file from CSV (or RDS) file
 # Load csv or RDS files to have a dataframe, then run the code to create TIF file (Raster Map) from the dataframe
 # Need to check CSV seperate character ("," or "\t")
@@ -27,7 +28,7 @@ df <- read.csv(Link_file, sep = '\t') # Read CSV --> Can chage to readRDS (if th
 
 df.map <- df[, c(1, 2, 3)] # only take 3 columns: x, y (2 coordinates column) and the last column will be the values of pixels in the map (Here will be FOI)
 
-Namefile = 'Endemic_EM_Rescale_Full_Cov_TVT_Once_400_Land'
+Namefile = 'Endemic_EM_Rescale_Full_Cov_TVT_Once_400_Land' # Name to save the file
 raster <- create_raster_from_df(df.map, name = Namefile, savefile = TRUE)
 
 cat('===== FINISH [Create_Raster_From_Dataframe.R] =====\n')
