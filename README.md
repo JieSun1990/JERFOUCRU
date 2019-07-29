@@ -12,26 +12,28 @@ Each folder will have similar structure:
 3. **_Generate_** folder: containing the results after running the scipts (if they produce and save something)
 
 #### SUPPORTED LIBRARY
-Need to install the following libraries: sp, raster, rgdal, tidyverse, ggplot2, dplyr, tidyr, Rcpp (this is optional), rgeos, grid, gridExtra, rprodlim
+Need to install the following libraries: sp, raster, rgdal, tidyverse, ggplot2, dplyr, tidyr, Rcpp (this is optional), rgeos, grid, gridExtra, rprodlim, corrplot, randomForestSRC
 
 ## PART 1. TRAINING RANDOM FOREST
 
-### Work Flow 
+### Work Flow (Still missing how to convert FOI shapefile to raster map)
 0. Download TIF file from the internet
-1. Crop the downloaded file (within the boundary of a shapefile, e.g Endemic shapefile)_
+1. Crop the downloaded file (within the boundary of a shapefile, e.g Endemic shapefile)
 2. Calibrate the cropped file
 <br/>2.1: Reproject to the specific CRS and convert to corresponding resolution in the new CRS
 <br/>2.2: Aggregate to the specific resolution (e.g from 1x1km aggregate to 5x5km)
 <br/>2.3: Resample to ensure all files share same coordinates (need to decide which file is the reference map)
 3. Gather all calibrated maps to create dataframe including features and outcome (FOI) columns
-4. Perform Overlay Adjustment to find out the exactly mean FOI values of the non-overlay regions
-5. Perform EM to disaggregate data
-6. Create Train-Validate-Test subset by building a 400x400km grids (or other resolutions)
-7. Train the model and save the result
-8. Plot the variable importance
+4. Run randomForestSRC to impute the missing values in the dataframe
+5. Perform Overlay Adjustment to find out the exactly mean FOI values of the non-overlay regions
+6. Perform EM to disaggregate data
+7. Create Train-Validate-Test subset by building a 400x400km grids (or other resolutions)
+8. Train the model and save the result
+9. Plot the variable importance
 
 ### Core Functions 
 #### Step 1: Crop boundary of downloaded TIF files
+Data downloaded from the internet usually is entire map. We need to crop it within the endemic area.
 - **Crop_Boundary_Single_File**: Simple script for cropping a single TIF file. It is suitable when you want to try the cropping process to a random TIF file.
 - **Crop_Boundary_All_Files**: Perform cropping process to entire covariate files (bioclimate, demography, pigs, ...). Note that before using this script, you need to have the well-organized folders containing these covariate files.
 
@@ -49,16 +51,29 @@ The Calibrate process consists of 3 following steps:
 #### Step 3: Create a dataframe including all information of calibrated TIF files 
 - **Gather_Features_Dataframe**: Gather all values of calibrated TIF files and create a dataframe containing pixel coordinates and its values for each feature. You also need to rename the column names in the gathered dataframe because the original column names will be messy. Note that before using this script, you need to have the well-organized folders containing the calibrated covariate files.
 
-#### Step 4: Perform Overlay adjustment in FOI
+#### Step 4: Use randomForestSRC to run the imputation random forest (not the prediction model)
+Random Forest also provide the imputation algorithm. To make it independent with the FOI, we can remove the FOI column in the dataframe created in **_Step 3_**, then run the imputation random forest. Note that this step requires a large amount of RAM (since R is not a good choice for these kind of techniques) and it will take a long time to finish. I have run this long time ago, hence we can use this data instead of running this again.
+- **Imputation_RF**: Run the imputation Random Forest Model to impute missing values in each features (Not yet included)
+- **Evaluate_Imputation**: Try to evaluate the imputation of RF by creating pseudo-NA data. Some of non-NA positions at each feature will be assigned NA, then run the RF to impute these values again. We will use R-squared to evaluate the accuracy of the imputation RF. (Not yet included)
+
+#### Step 5: Perform Overlay adjustment in FOI
 This step is one of the most complicated steps. There is an issue (called Overlay issue) in a calibrated FOI TIF file. The Overlay issue is the case that some catchment areas lie inside other catchment areas. In this case, we assume that the catalytic modelled FOI value of the big catchment area will be the mean of FOI values of all pixels that lie in the big regions (including pixels that lie in smaller catchment areas but belong to the bigger one). Therefore, the FOI values of pixels that are not inside smaller catchment areas need to be adjusted to constrain with the assumption. 
 - **Assign_Regions_For_Adjust_Overlay**: Assign index for pixels having the same FOI values (which means these pixels will belong in the same regions). These indexes will be used to check which regions are overlay or non-overlay. (This checking part is done manually by viewing on QGIS with the highest level of carefulness)
 - **Regions_Index_Information**: This script just provides information about indexes generated by **Assign_Regions_For_Adjust_Overlay**. By looking at this script, we will know how the regions affect others. And use this information to run **Adjust_Overlay**. This script is created manually by doing analysis and observing regions on QGIS.
 - **Adjust_Overlay**: Run the overlay adjustment after you knew which regions are overlay and non-overlay. You need to know how the regions overlay (e.g. which region indexes are inside other indexes)
 
+#### Step 6: Perform EM to disaggregate FOI values
+Run EM to disaggregate FOI values to each pixels. The constrain is that the FOI value at 1 region will be the mean of FOI of all pixels belong to that region. Here we implemented EM algorithm based from **_flowerdew1992_** article. We need 2 extra features related to FOI. 1 of 2 features need to have a positive correlation with the FOI. By plotting correlationship graph, we choose Bio_15 is the positive correlation feature. The second feature is Bio_04, which is the most important features after running Random Forest (imputing) 
+- **EM_Disaggregate**: Perform EM and save dataframe to Rds, also write to CSV file in order to let Python can read the file and train the Random Forest model.
+
+#### Step 7: Create Grids to divide dataset into 3 subset: Train-Validate-Test
+
+
 ### Supporting Functions  
 - **Create_Raster_From_Dataframe**: Create a raster (map) as a TIF file from a dataframe in R. The dataframe has 3 columns: x, y (coordinates of a pixel), values (values that we want to visualize in a map).
 - **Calculate_NA_Proportion**: Find the missing portion of each feature in the original dataframe (original means before imputing step)
 - **Dataframe_To_CSV**: Convert Rds (dataframe) to csv files so that Python can read the data to run Random Forest
+- **Plot_Correlation_Matrix**: Plot the correlation coefficient between features and the FOI values. Can use this for choosing a feature that have strong positive (negative) relationship with FOI and use that feature in **EM_Disaggregation**
 
 ## PART 2. GENERATE CASES 
 This folder includes scripts, Data folder and Generate folder.
@@ -76,7 +91,7 @@ This folder includes scripts, Data folder and Generate folder.
 - Cases_SHP: Vector maps (Shapfile) in which values at each country is the total cases of all age groups 
 
 ### Work Flow 
-1. Find the population of each country (extract from the map). Do this by creating Country Index for each pixel on the map indicating which countries that a pixel belongs to → Run **Assign_Endemic_Regions** (This will take a while to finish. Dont run this file unless you want or there is something change about the endemic map)
+1. Find the population of each country (extract from the map). Do this by creating Country Index for each pixel on the map indicating which countries that a pixel belongs to → Run **Assign_Endemic_Regions** (This will take a while to finish, so I have run it for you. Dont need to run it again. Dont run this file unless you want or there is something change about the endemic map)
 2. Adjust the population data to match with UN data and Quan subnation data (PAK, RUS, AUS). Adjust on country level first, then find the ratio and adjust on pixel level → Run **Adjust_Pop_To_Match_UN**
 3. Extract age-distribution population based from VIMC (Quan data) → Run **Extract_Age_Distribution_Population**
 4. Generate cases at each pixel (Now we have FOI and age-distribution population at each pixel)→ Run **Generate** script
@@ -90,7 +105,7 @@ This folder includes scripts, Data folder and Generate folder.
 - **Generate_Cases_Map_Country**: Plot the shapefile map (not raster) in which values representing for each country is the total cases of entire country
 
 ## PART 3. COMPARING WITH WHO INCIDENCE GROUPING
-**_Please note that you can run this COMPARING part only after you did run the GENERATE CASES part._**
+**_Please note that you only run this COMPARING part after you did run the GENERATE CASES part._**
 <br/>Most of the data used for this part is from the **_GENERATE CASES_** part. Therefore there is no Data folder in this part. However there is a **_Quan_Result folder_**, which contains the generated cases WHO-IG did by Quan.
 
 ### Work Flow
