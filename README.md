@@ -12,43 +12,50 @@ Each folder will have similar structure:
 3. **_Generate_** folder: containing the results after running the scipts (if they produce and save something)
 
 #### SUPPORTED LIBRARY
-Need to install the following libraries: sp, raster, rgdal, tidyverse, ggplot2, dplyr, tidyr, Rcpp (this is optional), rgeos, grid, gridExtra
+Need to install the following libraries: sp, raster, rgdal, tidyverse, ggplot2, dplyr, tidyr, Rcpp (this is optional), rgeos, grid, gridExtra, rprodlim
 
 ## PART 1. TRAINING RANDOM FOREST
 
 ### Work Flow 
-1. Download TIF file from the internet
-2. Crop the downloaded file (within the boundary of a shapefile, e.g Endemic shapefile)_
-3. Calibrate the cropped file
-3.1: Reproject to the specific CRS and convert to corresponding resolution in the new CRS
-3.2: Aggregate to the specific resolution (e.g from 1x1km aggregate to 5x5km)
-3.3: Resample to ensure all files share same coordinates (need to decide which file is the reference map)
-4. Gather all calibrated maps to create dataframe including features and outcome (FOI) columns
-5. Perform Overlay Adjustment to find out the exactly mean FOI values of the non-overlay regions
-6. Perform EM to disaggregate data
-7. Create Train-Validate-Test subset by building a 400x400km grids (or other resolutions)
-8. Train the model and save the result
-9. Plot the variable importance
+0. Download TIF file from the internet
+1. Crop the downloaded file (within the boundary of a shapefile, e.g Endemic shapefile)_
+2. Calibrate the cropped file
+2.1: Reproject to the specific CRS and convert to corresponding resolution in the new CRS
+2.2: Aggregate to the specific resolution (e.g from 1x1km aggregate to 5x5km)
+2.3: Resample to ensure all files share same coordinates (need to decide which file is the reference map)
+3. Gather all calibrated maps to create dataframe including features and outcome (FOI) columns
+4. Perform Overlay Adjustment to find out the exactly mean FOI values of the non-overlay regions
+5. Perform EM to disaggregate data
+6. Create Train-Validate-Test subset by building a 400x400km grids (or other resolutions)
+7. Train the model and save the result
+8. Plot the variable importance
 
 ### Core Functions 
-#### Step 1: Crop boundary of downloaded TIF file
-- **Crop_Boundary_Single_File**
-- **Crop_Boundary_All_Files**
+#### Step 1: Crop boundary of downloaded TIF files
+- **Crop_Boundary_Single_File**: Simple script for cropping a single TIF file. It is suitable when you want to try the cropping process to a random TIF file.
+- **Crop_Boundary_All_Files**: Perform cropping process to entire covariate files (bioclimate, demography, pigs, ...). Note that before using this script, you need to have the well-organized folders containing these covariate files.
 
-#### Step 2: Reproject/Aggregate/Resample cropped TIF File 
+#### Step 2: Reproject/Aggregate/Resample CROPPED TIF files
 Note: These steps will extrapolate values at each new coordinate by using 2 given methods:
-    • ‘bilinear’ : for continuous values 
-    • ‘ngb’/nearest neighbor : for categorical values
+- **‘bilinear’** : for continuous values 
+- **‘ngb’**/nearest neighbor : for categorical values
 1. Reproject: reproject to the same CRS, and also convert to the corresponding resolution (Ex: 30 seconds resolution = 1x1km = 0.00833 deg) → need to check manually about this number then run the code.
-2. Aggregate: aggregate from small resolution to higher (Ex: from 1x1 to 5x5km): can create new method for the cases population at 5x5 is the sum of all pixel at 1x1 resolution (not only bilinear or ngb)
+2. Aggregate: aggregate from small resolution to higher (Ex: from 1x1 to 5x5km): can create new method (called **sum**) for the cases population at 5x5 is the sum of all pixel at 1x1 resolution (not only bilinear or ngb)
 3. Resample: sample in order to match the same coordinates with a reference TIF file
-- **Calibrate_Raster**
+- **Calibrate_Raster_Single_Files**: Simple script for calibrating a single TIF file. It is suitable when you want to try the calibrating process to a random TIF file.
+- **Calibrate_Raster_All_Files**: Perform calibrating process to entire **CROPPED** covariate files (bioclimate, demography, pigs, ...). Note that before using this script, you need to have the well-organized folders containing these covariate files.
 
+#### Step 3: Create a dataframe including all information of calibrated TIF files 
+- **Gather_Features_Dataframe**: Gather all values of calibrated TIF files and create a dataframe containing pixel coordinates and its values for each feature. You also need to rename the column names in the gathered dataframe because the original column names will be messy. Note that before using this script, you need to have the well-organized folders containing the calibrated covariate files.
 
+#### Step 4: Perform Overlay adjustment in FOI
+There is an issue (called Overlay issue) in a calibrated FOI TIF file. The Overlay issue is the case that some catchment areas lie inside other catchment areas. In this case, we assume that the catalytic modelled FOI value of the big catchment area will be the mean of FOI values of all pixels that lie in the big regions (including pixels that lie in smaller catchment areas but belong to the bigger one). Therefore, the FOI values of pixels that are not inside smaller catchment areas need to be adjusted to constrain with the assumption. 
+- **Assign_Regions_For_Adjust_Overlay**: Assign index for pixels having the same FOI values (which means these pixels will belong in 1 regions). These indexes will be used to check which regions are overlay or non-overlay. (This checking part is done manually by viewing on QGIS with the highest level of carefulness)
+- **Adjust_Overlay**: Run the overlay adjustment after you knew which regions are overlay and non-overlay.
 
 ### Supporting Functions  
-- **Create_Raster_From_Dataframe**
-
+- **Create_Raster_From_Dataframe**: Create a raster (map) as a TIF file from a dataframe in R. The dataframe has 3 columns: x, y (coordinates of a pixel), values (values that we want to visualize in a map).
+- **Calculate_NA_Proportion**: Find the missing portion of each feature in the original dataframe (original means before imputing step)
 
 ## PART 2. GENERATE CASES 
 This folder includes scripts, Data folder and Generate folder.

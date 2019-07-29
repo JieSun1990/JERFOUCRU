@@ -7,6 +7,8 @@
 library(raster)
 library(rgdal)
 
+cat('===== START [Crop_Boundary_All_Files.R] =====\n')
+
 Crop_Raster <- function(Folder, endemic_shapefile, suffix_name = 'Cropped', start_id = 0, end_id = 0){
     # INPUT
     #   Folder: Link to the direct folder containing tif (or tiff) files
@@ -92,4 +94,4 @@ if (length(Folders) > 1){
     cat("\n--------------------\n")
 }
 
-cat("########## FINISH ##########\n")
+cat('===== FINISH [Crop_Boundary_All_Files.R] =====\n')

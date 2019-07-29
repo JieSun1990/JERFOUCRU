@@ -7,6 +7,8 @@
 library(raster)
 library(rgdal)
 
+cat('===== START [Crop_Boundary_Single_Files.R] =====\n')
+
 # Step 1: Read TIF file and shapefile
 LinkTIF <- '~/DuyNguyen/RProjects/OUCRU JE/Figures/[Python] Result Model EM/Rescale_TVT_Once/Land/Endemic_EM_Rescale_Full_Cov_TVT_Once_400_Land.tif'
 LinkSHP <- '~/DuyNguyen/RProjects/OUCRU JE/Data JE/FOI Shapefile Full/Indo_Map/gadm36_IDN_1.shp' # Example: This is a Indonesia shapefile
@@ -24,3 +26,5 @@ map.boundary <- mask(map.crop, shapefile)
 # Step 4: Save file (optional)
 SaveName <- 'Full_Cov_TVT_Once_400_Land_IDN'
 writeRaster(map.boundary, SaveName, format = "GTiff")
+
+cat('===== FINISH [Crop_Boundary_Single_Files.R] =====\n')

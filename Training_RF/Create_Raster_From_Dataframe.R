@@ -7,6 +7,8 @@
 library(sp)
 library(raster)
 
+cat('===== START [Create_Raster_From_Dataframe.R] =====\n')
+
 create_raster_from_df <- function(dataframe, res = c(5, 5),
                                   crs = "+proj=eqc +lat_ts=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=km +no_defs",
                                   name = 'rasterdf', savefile = FALSE){
@@ -27,3 +29,5 @@ df.map <- df[, c(1, 2, 3)] # only take 3 columns: x, y (2 coordinates column) an
 
 Namefile = 'Endemic_EM_Rescale_Full_Cov_TVT_Once_400_Land'
 raster <- create_raster_from_df(df.map, name = Namefile, savefile = TRUE)
+
+cat('===== FINISH [Create_Raster_From_Dataframe.R] =====\n')

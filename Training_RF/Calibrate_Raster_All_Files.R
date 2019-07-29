@@ -1,4 +1,5 @@
 ##### NOTE #####
+# Perform Calibrate process for entire files in a folder (including its subfolders)
 ## used to convert raster B to the same resolution, same coordinates and same CRS with the reference raster A 
 # km / 40000 * 360 = degree --> 0.00833 deg = 1km = 30 seconds (GOOGLE TO CONFIRM)
 # ProjectRaster: https://www.rdocumentation.org/packages/raster/versions/2.9-23/topics/projectRaster
@@ -15,6 +16,8 @@
 library(raster)
 library(rgdal)
 library(sp)
+
+cat('===== START [Calibrate_Raster_All_Files.R] =====\n')
 
 agg.fun <- function(x, ...){
     return(sum(x))
@@ -92,7 +95,7 @@ Calibrate_Raster <- function(origin, reference,
     return(calibrate)
 }
 
-# Need to change manually some parameter: method, res
+# Script to perform on entire files in a folder
 Calibrate_Raster_Folder <- function(Folder, reference,
                                     method_reproject = 'bilinear', method_aggregate = 'bilinear', 
                                     res_reproject = 1, res_aggregate = 5){
@@ -170,4 +173,4 @@ for (index_Data in 1 : length(ListData)){
     }    
 }
 
-cat("########## FINISH ##########\n")
+cat('===== FINISH [Calibrate_Raster_All_Files.R] =====\n')
