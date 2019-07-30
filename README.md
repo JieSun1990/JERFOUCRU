@@ -2,9 +2,9 @@
 
 ## SUMMARY
 The entire project is divided into 3 parts
-1. **Training Random Forest**: This part includes functions to preprocess data (adjust CRS, calibrate coordinates, ...), create train-validate-test set, perform Overlay and EM disaggregate, training model (on python), and other supporting functions to visualize
-2. **Generate Cases**: This part includes functions to generate cases at pixel levels and country-wide levels. It also contains functions to adjust the population data (from the mapping to match with UN data)
-3. **Comparing with WHO Incidence Grouping (WHO-IG)**: The last part comprises functions visualizing the cases (or population, etc) between RF and WHO-IG data
+1. **Training Random Forest**[here](#PART-1): This part includes functions to preprocess data (adjust CRS, calibrate coordinates, ...), create train-validate-test set, perform Overlay and EM disaggregate, training model (on python), and other supporting functions to visualize
+2. **Generate Cases**[here](#PART-2): This part includes functions to generate cases at pixel levels and country-wide levels. It also contains functions to adjust the population data (from the mapping to match with UN data)
+3. **Comparing with WHO Incidence Grouping (WHO-IG)**[here](#PART-3): The last part comprises functions visualizing the cases (or population, etc) between RF and WHO-IG data
 
 Each folder will have similar structure:
 1. **Script** files: Code
