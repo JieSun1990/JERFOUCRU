@@ -12,7 +12,8 @@ Each folder will have similar structure:
 3. **_Generate_** folder: containing the results after running the scipts (if they produce and save something)
 
 #### SUPPORTED LIBRARY
-Need to install the following libraries: sp, raster, rgdal, tidyverse, ggplot2, dplyr, tidyr, Rcpp (this is optional), rgeos, grid, gridExtra, rprodlim, corrplot, randomForestSRC
+Need to install the following libraries: sp, raster, rgdal, tidyverse, ggplot2, dplyr, tidyr, rgeos, grid, gridExtra, rprodlim, corrplot, randomForestSRC 
+Optional: Rcpp, rasterVis, latticeExtra
 
 ## PART 1. TRAINING RANDOM FOREST
 
@@ -67,7 +68,8 @@ Run EM to disaggregate FOI values to each pixels. The constrain is that the FOI 
 - **EM_Disaggregate**: Perform EM and save dataframe to Rds, also write to CSV file in order to let Python can read the file and train the Random Forest model.
 
 #### Step 7: Create Grids to divide dataset into 3 subset: Train-Validate-Test
-
+Create Sampling Grids (with large resolution: 200, 300, 400, 500km). Use 1 of these options to sample which grids will be used for Training, Validating, and Testing.
+-**Create_Sampling_Grids**: This script will need the extent (coordinates limitation) of a calibrated FOI map and the coordinates of all pixels in that map. The result will be a dataframe containing 3 columns: x, y (coordinates), and grids index. 
 
 ### Supporting Functions  
 - **Create_Raster_From_Dataframe**: Create a raster (map) as a TIF file from a dataframe in R. The dataframe has 3 columns: x, y (coordinates of a pixel), values (values that we want to visualize in a map).

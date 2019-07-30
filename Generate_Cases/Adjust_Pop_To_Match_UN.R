@@ -63,7 +63,7 @@ pop_data1 <- pop_data1[ ,c(1, which(colnames(pop_data1) == 'X2015'))]
 pop_data1$region <- as.character(pop_data1$region)
 # foi_data1 <- readRDS("JE_model_Quan/results/areas_lambda/ende_24_regions_lambda_extr_or.rds")
 foi_data1 <- readRDS("Data/ende_24_regions_lambda_extr_or.rds") # FOI result from catalytic models at each region
-select_region <- c(1:6, 11:15, 19:24, 28:30, 32:40, 48) # regions that we considered in endemic areas
+select_region <- c(1:6, 11:15, 19:24, 28:30, 32:40, 48) # regions that we considered in endemic areas (WHO-IG)
 select_region <- as.character(foi_data1$region[select_region])
 pop_data1 <- pop_data1[which(pop_data1$region %in% select_region),]
 
