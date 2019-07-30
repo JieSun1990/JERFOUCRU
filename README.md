@@ -30,7 +30,7 @@ Optional: Rcpp, rasterVis, latticeExtra
 6. Perform EM to disaggregate data
 7. Create Train-Validate-Test subset by building a 400x400km grids (or other resolutions)
 8. Train the model and save the result
-9. Plot the variable importance
+9. Plot the result
 
 ### Core Functions 
 #### Step 1: Crop boundary of downloaded TIF files
@@ -42,7 +42,8 @@ Data downloaded from the internet usually is entire map. We need to crop it with
 Note: These steps will extrapolate values at each new coordinate by using 2 given methods:
 - **‘bilinear’** : for continuous values 
 - **‘ngb’**/nearest neighbor : for categorical values
-<br/>The Calibrate process consists of 3 following steps:
+
+The Calibrate process consists of 3 following steps:
 1. Reproject: reproject to the same CRS, and also convert to the corresponding resolution (Ex: 30 seconds resolution = 1x1km = 0.00833 deg) → need to check manually about this number then run the code.
 2. Aggregate: aggregate from small resolution to higher (Ex: from 1x1 to 5x5km): can create new method (called **sum**) for the cases population at 5x5 is the sum of all pixel at 1x1 resolution (not only bilinear or ngb)
 3. Resample: sample in order to match the same coordinates with a reference TIF file
@@ -54,8 +55,8 @@ Note: These steps will extrapolate values at each new coordinate by using 2 give
 
 #### Step 4: Use randomForestSRC to run the imputation random forest (not the prediction model)
 Random Forest also provide the imputation algorithm. To make it independent with the FOI, we can remove the FOI column in the dataframe created in **_Step 3_**, then run the imputation random forest. Note that this step requires a large amount of RAM (since R is not a good choice for these kind of techniques) and it will take a long time to finish. I have run this long time ago, hence we can use this data instead of running this again.
-- **Imputation_RF**: Run the imputation Random Forest Model to impute missing values in each features (Not yet included)
-- **Evaluate_Imputation**: Try to evaluate the imputation of RF by creating pseudo-NA data. Some of non-NA positions at each feature will be assigned NA, then run the RF to impute these values again. We will use R-squared to evaluate the accuracy of the imputation RF. (Not yet included)
+- **Imputation_RF**: Run the imputation Random Forest Model to impute missing values in each features **_(Not yet included)_**
+- **Evaluate_Imputation**: Try to evaluate the imputation of RF by creating pseudo-NA data. Some of non-NA positions at each feature will be assigned NA, then run the RF to impute these values again. We will use R-squared to evaluate the accuracy of the imputation RF. **_(Not yet included)_**
 
 #### Step 5: Perform Overlay adjustment in FOI
 This step is one of the most complicated steps. There is an issue (called Overlay issue) in a calibrated FOI TIF file. The Overlay issue is the case that some catchment areas lie inside other catchment areas. In this case, we assume that the catalytic modelled FOI value of the big catchment area will be the mean of FOI values of all pixels that lie in the big regions (including pixels that lie in smaller catchment areas but belong to the bigger one). Therefore, the FOI values of pixels that are not inside smaller catchment areas need to be adjusted to constrain with the assumption. 
@@ -64,12 +65,21 @@ This step is one of the most complicated steps. There is an issue (called Overla
 - **Adjust_Overlay**: Run the overlay adjustment after you knew which regions are overlay and non-overlay. You need to know how the regions overlay (e.g. which region indexes are inside other indexes)
 
 #### Step 6: Perform EM to disaggregate FOI values
-Run EM to disaggregate FOI values to each pixels. The constrain is that the FOI value at 1 region will be the mean of FOI of all pixels belong to that region. Here we implemented EM algorithm based from **_flowerdew1992_** article. We need 2 extra features related to FOI. 1 of 2 features need to have a positive correlation with the FOI. By plotting correlationship graph, we choose Bio_15 is the positive correlation feature. The second feature is Bio_04, which is the most important features after running Random Forest (imputing) 
+Run EM to disaggregate FOI values to each pixels. The constrain is that the FOI value at 1 region will be the mean of FOI of all pixels belong to that region. Here we implemented EM algorithm based from **_flowerdew1992_** article. We need 2 extra features related to FOI. 1 of 2 features need to have a positive correlation with the FOI. By plotting correlationship graph, we choose Bio_15 is the positive correlation feature. The second feature is Bio_04, which is the most important features after running Random Forest (imputing). 
 - **EM_Disaggregate**: Perform EM and save dataframe to Rds, also write to CSV file in order to let Python can read the file and train the Random Forest model.
 
 #### Step 7: Create Grids to divide dataset into 3 subset: Train-Validate-Test
 Create Sampling Grids (with large resolution: 200, 300, 400, 500km). Use 1 of these options to sample which grids will be used for Training, Validating, and Testing.
--**Create_Sampling_Grids**: This script will need the extent (coordinates limitation) of a calibrated FOI map and the coordinates of all pixels in that map. The result will be a dataframe containing 3 columns: x, y (coordinates), and grids index. 
+- **Create_Sampling_Grids**: This script will need the extent (coordinates limitation) of a calibrated FOI map and the coordinates of all pixels in that map. The result will be a dataframe containing 3 columns: x, y (coordinates), and grids index. 
+
+#### Step 8: Train the Random Forest Model
+This step need to be done by Python. Comparing with R, Python can train the RF model much faster and requires less memory than R.
+- **Train_Model_RandomForest.py**: Sample which sampling grids will be used for training, validating, and testing. Then it will train the RF model and save the result, accuracy, variable importance, ... to CSV files (We can use R to plot these files later). 
+- **Plot_Sampling_Grids.py**: Plot and color Sampling Grids based on their subset (Which Grids are used for Training, Validating and Testing?). The Training, Validating, and Testing Grids are created after you run **_Train_Model_RandomForest.py_**.
+
+#### Step 9: Plot the result
+Basically, this is not a complicated step. Based on your wishes, you can plot the generated files from the above steps (EM, RF model, variable importance, ...). Here I just provided some simple examples of visualization.
+
 
 ### Supporting Functions  
 - **Create_Raster_From_Dataframe**: Create a raster (map) as a TIF file from a dataframe in R. The dataframe has 3 columns: x, y (coordinates of a pixel), values (values that we want to visualize in a map).
