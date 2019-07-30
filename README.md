@@ -42,7 +42,7 @@ Data downloaded from the internet usually is entire map. We need to crop it with
 Note: These steps will extrapolate values at each new coordinate by using 2 given methods:
 - **‘bilinear’** : for continuous values 
 - **‘ngb’**/nearest neighbor : for categorical values
-The Calibrate process consists of 3 following steps:
+<br/>The Calibrate process consists of 3 following steps:
 1. Reproject: reproject to the same CRS, and also convert to the corresponding resolution (Ex: 30 seconds resolution = 1x1km = 0.00833 deg) → need to check manually about this number then run the code.
 2. Aggregate: aggregate from small resolution to higher (Ex: from 1x1 to 5x5km): can create new method (called **sum**) for the cases population at 5x5 is the sum of all pixel at 1x1 resolution (not only bilinear or ngb)
 3. Resample: sample in order to match the same coordinates with a reference TIF file
