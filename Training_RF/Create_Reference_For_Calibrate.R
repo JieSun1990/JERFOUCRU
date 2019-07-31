@@ -17,7 +17,7 @@ setwd(script.dir)
 # Create folder to store the result (will show warnings if the folder already exists --> but just warning, no problem)
 dir.create(file.path('Generate/Calibrated/FOI/'), showWarnings = TRUE)
 
-FileMap <- 'Data/Original_FOI_Map/FOI_Map_Origin.tif' # raster map which is the result from the QGIS rasterize function
+FileMap <- 'Data/Original_FOI_Map/Original_FOI_Rasterize.tif' # raster map which is the result from the QGIS rasterize function
 origin <- raster(FileMap)
 
 crs = "+proj=eqc +lat_ts=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=km +no_defs"

@@ -3,6 +3,7 @@
 # This dataframe will be used for the Random Forest Model later
 # The calibrated TIF files need to be well-organized in a folder (applicable with subfolders)
 # The last part is used to rename the column names in the dataframe (since the original is messy)
+# SINCE I HAVE RUN THE CODE FOR YOU --> IF YOU WANT TO EXTRACT LAND-PIXEL --> RUN THE EXTRACT LAND PIXEL part
 # ---------- #
 
 library(sp)
@@ -12,16 +13,16 @@ library(prodlim)
 
 cat('===== START [Gather_Features_Dataframe.R] =====\n')
 
-# Get directory of the script (this part only work if source the code, wont work if run directly in the console)
-# This can be set manually !!! -->setwd('bla bla bla')
+## Get directory of the script (this part only work if source the code, wont work if run directly in the console)
+## This can be set manually !!! -->setwd('bla bla bla')
 script.dir <- dirname(sys.frame(1)$ofile)
 script.dir <- paste0(script.dir, '/')
 setwd(script.dir)
 
-# Create folder to store the result (will show warnings if the folder already exists --> but just warning, no problem)
-dir.create(file.path('Generate/Dataframe/'), showWarnings = TRUE)
+## Create folder to store the result (will show warnings if the folder already exists --> but just warning, no problem)
+dir.create(file.path('Generate/Gather_DF/'), showWarnings = TRUE)
 
-# =================== CREATE RDS FILE (NOT ADJUSTED COLNAMES) ===================
+## =================== CREATE RDS FILE (NOT ADJUSTED COLNAMES) ===================
 Match_Feature <- function(ref.df, ft.df){
   # Matching coordinate points in feature dataframe ft.df with points in reference dataframe ref.df (having same coordinates)
   # if ft.df does not have points in ref.df --> these points in ft.df are NA
@@ -85,12 +86,22 @@ for (idx.folders in 1:length(folders)){
       colnames(Endemic.df)[ncol(Endemic.df)] <- colnames(Match)[1]
       rm(Match)
     }
-    saveRDS(Endemic.df, file = paste0("Generate/Dataframe/Original_Features_Endemic.Rds"))
+    saveRDS(Endemic.df, file = paste0("Generate/Gather_DF/Original_Features_Endemic.Rds"))
   }
 }
 
+## =================== EXTRACT LAND PIXEL ===================
+## You can save the Land-pixel only --> pixel that have Water value (from the Water classification map) = 0 is land
+# Endemic.df <- readRDS('Generate/Dataframe/Original_Features_Endemic.Rds')
+# Endemic.df.land <- Endemic.df[which(Endemic.df$WM == 0), ] # remember to change to column name. Here WM is the column for Water-Land classification
+# saveRDS(Endemic.df.land, file = paste0("Generate/Dataframe/Original_Features_Endemic_Land.Rds"))
 
-# ================ ADJUST COLNAMES =================
+# Studies.df <- Endemic.df[!is.na(Endemic.df$FOI), ] # Take pixels that have FOI values from catalytic models --> Use this dataframe to train and evaluate the RF model
+# Studies.df.land <- Studies.df[which(Studies.df$WM == 0), ] # Take the land pixels
+# saveRDS(Studies.df, file = paste0("Generate/Dataframe/Original_Features_Studies.Rds"))
+# saveRDS(Studies.df.land, file = paste0("Generate/Dataframe/Original_Features_Studies_Land.Rds"))
+
+## ================ ADJUST COLNAMES =================
 ## Need to run this part (but have to change manually based on your context)
 # rm(list =ls())
 # 

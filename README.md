@@ -18,25 +18,25 @@ Need to install the following libraries: sp, raster, rgdal, tidyverse, ggplot2, 
 ## PART 1. TRAINING RANDOM FOREST
 Because the downloaded data as well as some other intensive data are difficult to upload to Github, I just created empty Data folders. We can copy our data into that folder to run the code.
 
-### Work Flow (Still missing how to convert FOI shapefile to raster map)
+### Work Flow
 0. Download TIF file from the internet and convert FOI shapefile to raster map
-[1](#step-1-crop-boundary-of-downloaded-tif-files). Crop the downloaded file (within the boundary of a shapefile, e.g Endemic shapefile)
-[2](#step-2-reprojectaggregateresample-cropped-tif-files). Calibrate the cropped file
+<br/>[1](#step-1-crop-boundary-of-downloaded-tif-files). Crop the downloaded file (within the boundary of a shapefile, e.g Endemic shapefile)
+<br/>[2](#step-2-reprojectaggregateresample-cropped-tif-files). Calibrate the cropped file
 <br/>2.1: Reproject to the specific CRS and convert to corresponding resolution in the new CRS
 <br/>2.2: Aggregate to the specific resolution (e.g from 1x1km aggregate to 5x5km)
 <br/>2.3: Resample to ensure all files share same coordinates (need to decide which file is the reference map)
-[3](#step-3-create-a-dataframe-including-all-information-of-calibrated-tif-files). Gather all calibrated maps to create dataframe including features and outcome (FOI) columns
-[4](#step-4-use-randomforestsrc-to-run-the-imputation-random-forest-not-the-prediction-model). Run randomForestSRC to impute the missing values in the dataframe
-[5](#step-5-perform-overlay-adjustment-in-foi). Perform Overlay Adjustment to find out the exactly mean FOI values of the non-overlay regions
-[6](#step-6-perform-em-to-disaggregate-foi-values). Perform EM to disaggregate data
-[7](#step-7-create-grids-to-divide-dataset-into-3-subset-train-validate-test). Create Train-Validate-Test subset by building a 400x400km grids (or other resolutions)
-[8](#step-8-train-the-random-forest-model). Train the model and save the result. **(Run on Python)**
-[9](#step-9-plot-the-result). Plot the result
+<br/>[3](#step-3-create-a-dataframe-including-all-information-of-calibrated-tif-files). Gather all calibrated maps to create dataframe including features and outcome (FOI) columns
+<br/>[4](#step-4-use-randomforestsrc-to-run-the-imputation-random-forest-not-the-prediction-model). Run randomForestSRC to impute the missing values in the dataframe
+<br/>[5](#step-5-perform-overlay-adjustment-in-foi). Perform Overlay Adjustment to find out the exactly mean FOI values of the non-overlay regions
+<br/>[6](#step-6-perform-em-to-disaggregate-foi-values). Perform EM to disaggregate data
+<br/>[7](#step-7-create-grids-to-divide-dataset-into-3-subset-train-validate-test). Create Train-Validate-Test subset by building a 400x400km grids (or other resolutions)
+<br/>[8](#step-8-train-the-random-forest-model). Train the model and save the result. **(Run on Python)**
+<br/>[9](#step-9-plot-the-result). Plot the result
 
 ### Core Functions 
 #### Step 0: Convert FOI Shapefile to FOI raster map
-Here we used QGIS software to convert shapefile to raster (TIF) file. Below is how we can convert it.
-![Instruction how to use QGIS to convert shapefile to a raster file](https://user-images.githubusercontent.com/15571804/62196660-a07dfe00-b3a8-11e9-8bf6-7040ba36de82.gif)
+Here we used QGIS software to convert shapefile to raster (TIF) file. The original FOI shapefile (created by fitting catalytic model to age-stratified cases data) is located in **_Data/Shapefile_FOI/_**. Below is how we can convert it to the TIF file (Click the GIF to have better resolutions). The result will be a raster map with the resolution of 1x1km (based on the option in QGIS) and it is stored in **_Data/Original_FOI_Map/_** folder.
+![QGIS-instruction](https://user-images.githubusercontent.com/15571804/62196660-a07dfe00-b3a8-11e9-8bf6-7040ba36de82.gif)
 
 #### Step 1: Crop boundary of downloaded TIF files
 Data downloaded from the internet usually is entire map. We need to crop it within the endemic area.
@@ -69,17 +69,18 @@ The Calibrate process consists of 3 following steps:
 <br/>The calibrated maps will be in **_Generate/Calibrated_** folder.
 
 **Functions**
-- **Create_Reference_For_Calibrate**: Create a reference map which will be used for Calibrate function. I suggest to use FOI map to be the reference map. I have run it and saved to **_Generate/Calibrated/FOI_**.
+- **Create_Reference_For_Calibrate**: Create a reference map which will be used for Calibrate function. I suggest to use FOI map to be the reference map. This script will use the original FOI map from [step 0](#step-0-convert-foi-shapefile-to-foi-raster-map). I have run it and saved to **_Generate/Calibrated/FOI_**.
 - **Calibrate_Raster_Single_Files**: Simple script for calibrating a single TIF file. It is suitable when you want to try the calibrating process to a random TIF file.
 - **Calibrate_Raster_All_Files**: Perform calibrating process to entire [**CROPPED**](#step-1-crop-boundary-of-downloaded-tif-files) covariate files (bioclimate, demography, pigs, ...). Note that before using this script, you need to have the well-organized folders containing these covariate files.
 
 #### Step 3: Create a dataframe including all information of calibrated TIF files
 Extract all features values from calibrated maps at each coordinates and gather into 1 dataframe.
+
 **Input**
-<br/> The main input is calibrated maps created as above. Besides, we also need to choose 1 calibrated map to become a reference map. The reference map is the map that have least missing values, hence it will have full of coordinates in the endemic areas. The reference should be one of Bioclimatic features (as they almost do not have missing values)
+<br/> The main input is calibrated maps created as above. Besides, we also need to choose 1 calibrated map to become a reference map. The reference map is the map that have least missing values, hence it will have full of coordinates in the endemic areas. The reference should be one of Bioclimatic features (as they almost do not have missing values).
 
 **Output**
-<br/> Dataframe named **Original_Features_Endemic.Rds** will be created at **_Generate/Dataframe/_** folder.
+<br/> Dataframe named **Original_Features_Endemic.Rds** will be created at **_Generate/Gather_DF/_** folder.
 
 **Functions** 
 - **Gather_Features_Dataframe**: Gather all values of calibrated TIF files and create a dataframe containing pixel coordinates and its values for each feature. You also need to rename the column names in the gathered dataframe because the original column names will be messy. Note that before using this script, you need to have the well-organized folders containing the calibrated covariate files.
@@ -90,7 +91,7 @@ Random Forest also provide the imputation algorithm. To make it independent with
 - **Evaluate_Imputation**: Try to evaluate the imputation of RF by creating pseudo-NA data. Some of non-NA positions at each feature will be assigned NA, then run the RF to impute these values again. We will use R-squared to evaluate the accuracy of the imputation RF. **_(Not yet included)_**
 
 #### Step 5: Perform Overlay adjustment in FOI
-This step is one of the most complicated steps. There is an issue (called Overlay issue) in a calibrated FOI TIF file. The Overlay issue is the case that some catchment areas lie inside other catchment areas. In this case, we assume that the catalytic modelled FOI value of the big catchment area will be the mean of FOI values of all pixels that lie in the big regions (including pixels that lie in smaller catchment areas but belong to the bigger one). Therefore, the FOI values of pixels that are not inside smaller catchment areas need to be adjusted to constrain with the assumption. 
+This step is one of the most complicated steps. This step will used the Study Catchment Area dataframe. This Study dataframe is extracted from the Endemic dataframe (result from Step 3 or Step 4). This dataframe only contains pixels that have FOI values by fitting catalytic model to age-stratified cases data. There is an issue (called Overlay issue) in a calibrated FOI TIF file. The Overlay issue is the case that some catchment areas lie inside other catchment areas. In this case, we assume that the catalytic modelled FOI value of the big catchment area will be the mean of FOI values of all pixels that lie in the big regions (including pixels that lie in smaller catchment areas but belong to the bigger one). Therefore, the FOI values of pixels that are not inside smaller catchment areas need to be adjusted to constrain with the assumption. 
 - **Assign_Regions_For_Adjust_Overlay**: Assign index for pixels having the same FOI values (which means these pixels will belong in the same regions). These indexes will be used to check which regions are overlay or non-overlay. (This checking part is done manually by viewing on QGIS with the highest level of carefulness)
 - **Regions_Index_Information**: This script just provides information about indexes generated by **Assign_Regions_For_Adjust_Overlay**. By looking at this script, we will know how the regions affect others. And use this information to run **Adjust_Overlay**. This script is created manually by doing analysis and observing regions on QGIS.
 - **Adjust_Overlay**: Run the overlay adjustment after you knew which regions are overlay and non-overlay. You need to know how the regions overlay (e.g. which region indexes are inside other indexes)
