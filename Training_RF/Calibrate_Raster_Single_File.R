@@ -111,7 +111,7 @@ Calibrate_Raster <- function(origin, reference,
 FileOrigin <- 'Generate/Cropped/Pigs/Pigs.tif' # Example
 Origin <- raster(FileOrigin)
 
-FileRef <- '/home/ubuntu/Data/WaterMask_Resample/Water_Mask_Endemic_v3_Resample.tif'
+FileRef <- 'Generate/Calibrated/FOI/FOI_Map_Calibrated.tif'
 Ref.resample <- raster(FileRef)
 
 crs <- "+proj=eqc +lat_ts=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=km +no_defs" # DO NOT CHANGE THIS CRS

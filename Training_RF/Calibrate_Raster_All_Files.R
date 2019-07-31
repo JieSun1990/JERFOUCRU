@@ -143,7 +143,7 @@ ListResolution_Reproject <- c(5, 1) # integer in km x km (original convert from 
 ListMethod_Reproject <- c(2, 2) # possible value: 1, 2
 ListMethod_Aggregate <- c(2, 2) # possible value: 1, 2, 3
 
-FileRef <- '/home/ubuntu/Data/WaterMask_Resample/Water_Mask_Endemic_v3_Resample.tif'
+FileRef <- 'Generate/Calibrated/FOI/FOI_Map_Calibrated.tif'
 Ref.resample <- raster(FileRef)
 
 

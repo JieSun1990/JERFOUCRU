@@ -36,10 +36,14 @@ Because the downloaded data as well as some other intensive data are difficult t
 ### Core Functions 
 #### Step 1: Crop boundary of downloaded TIF files
 Data downloaded from the internet usually is entire map. We need to crop it within the endemic area.
-##### Input
+
+#### Input
 In order to run this step, we will need the boundary shapefile file and put it in **_Data/Shapefile_Endemic_** folder (We can copy from [Part 2](#part-2-generate-cases) **_Generate_Cases/Data/Shapefile_Endemic_**). Besides, the downloaded TIF files should be in the respective subfolders in **_Data/Downloaded_Data/_** folder.
-##### Output
+
+#### Output
 The cropped maps will be in **_Generate/Cropped_** folder.
+
+#### Functions
 - **Crop_Boundary_Single_File**: Simple script for cropping a single TIF file. It is suitable when you want to try the cropping process to a random TIF file.
 - **Crop_Boundary_All_Files**: Perform cropping process to entire covariate files (bioclimate, demography, pigs, ...). Note that before using this script, you need to have the well-organized folders containing these covariate files.
 
@@ -49,15 +53,19 @@ Note: These steps will extrapolate values at each new coordinate by using 2 give
 - **‘ngb’**/nearest neighbor : for categorical values
 - **'sum'**: self-created function which is suitable for population variable (pop in large pixel = sum of all pop in small pixels inside the large pixel)
 
-##### Input
-Before running this script, we need to re-organize the cropped TIF files a bit. We should put the above cropped maps in respective subfolders of them. (Eg create a subfolder **_Pigs_** in **_Cropped_** folder and move the __Cropped_Pigs.tif__ to **_Pigs_** folder). The input of this script is the above cropped maps. Besides, we also need a reference map to match other maps to the reference coordinates. I think the reference map can be FOI Map or Water_Land Map. But please make sure that they are have the right CRS and right resolution (5x5km).
-##### Output
-The calibrated maps will be in **_Generate/Calibrated_** folder.
-
 The Calibrate process consists of 3 following steps:
 1. Reproject: reproject to the same CRS, and also convert to the corresponding resolution (Ex: 30 seconds resolution = 1x1km = 0.00833 deg) → need to check manually about this number then run the code.
 2. Aggregate: aggregate from small resolution to higher (Ex: from 1x1 to 5x5km): can create new method (called **sum**) for the cases population at 5x5 is the sum of all pixel at 1x1 resolution (not only bilinear or ngb)
 3. Resample: sample in order to match the same coordinates with a reference TIF file
+
+#### Input
+Before running this script, we need to re-organize the cropped TIF files a bit. We should put the above cropped maps in respective subfolders of them. (Eg create a subfolder **_Pigs_** in **_Cropped_** folder and move the __Cropped_Pigs.tif__ to **_Pigs_** folder). The input of this script is the above cropped maps. Besides, we also need a reference map to match other maps to the reference coordinates → Run **Create_Reference_For_Calibrate** first (I have run it for you).
+
+#### Output
+The calibrated maps will be in **_Generate/Calibrated_** folder.
+
+#### Functions
+- **Create_Reference_For_Calibrate**: Create a reference map which will be used for Calibrate function. I suggest to use FOI map to be the reference map. I have run it and save to **_Generate/Calibrated/FOI_**.
 - **Calibrate_Raster_Single_Files**: Simple script for calibrating a single TIF file. It is suitable when you want to try the calibrating process to a random TIF file.
 - **Calibrate_Raster_All_Files**: Perform calibrating process to entire [**CROPPED**](#step-1-crop-boundary-of-downloaded-tif-files) covariate files (bioclimate, demography, pigs, ...). Note that before using this script, you need to have the well-organized folders containing these covariate files.
 
