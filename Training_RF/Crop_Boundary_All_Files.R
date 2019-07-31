@@ -1,18 +1,29 @@
-##### NOTE #####
+# --- NOTE --- #
 # Use this file at the 1st step
 # Crop boundary of all TIF files within one / many folders
 # After cropping --> resample/reproject (to make the same coordinates and same resolution) --> 2nd step
-#####
+# ------------ #
 
 library(raster)
 library(rgdal)
 
 cat('===== START [Crop_Boundary_All_Files.R] =====\n')
 
-Crop_Raster <- function(Folder, endemic_shapefile, suffix_name = 'Cropped', start_id = 0, end_id = 0){
+# Get directory of the script (this part only work if source the code, wont work if run directly in the console)
+# This can be set manually !!! -->setwd('bla bla bla')
+script.dir <- dirname(sys.frame(1)$ofile)
+script.dir <- paste0(script.dir, '/')
+setwd(script.dir)
+
+# Create folder to store the result (will show warnings if the folder already exists --> but just warning, no problem)
+dir.create(file.path('Generate/Cropped/'), showWarnings = TRUE)
+
+
+Crop_Raster <- function(Folder, endemic_shapefile, Save_path = 'Generate/Cropped/', suffix_name = 'Cropped', start_id = 0, end_id = 0){
     # INPUT
     #   Folder: Link to the direct folder containing tif (or tiff) files
     #   endemic_shapefile: Shapefile of the boundary want to cutoff
+    #   Save_path: Directory to the folder where you want to save the cropped maps to
     #   suffix_name: suffix string used to make a new file name after cropping
     #   start_id, end_id: index in a list files in a specific folder that we want to perform cropping to --> set it to 0 (default) if we want to perform to all files
     # OUTPUT
@@ -70,8 +81,8 @@ Crop_Raster <- function(Folder, endemic_shapefile, suffix_name = 'Cropped', star
     }
 }
 
-LinkBoundaryFile <- '~/DuyNguyen/RProjects/OUCRU JE/Data JE/Map_Endemic_v3/Ende_map_feed.shp' # specific to name of boundary shapefile
-LinkData <- '~/Downloads/Asia_1km_Population/' # Link to the Head Folder (that can contains subfolders) containing TIF Files
+LinkBoundaryFile <- 'Data/Shapefile_Endemic/Ende_map_feed.shp' # specific to name of boundary shapefile
+LinkData <- 'Downloaded_Data/' # Link to the Head Folder (that can contains subfolders) containing TIF Files
 
 start_time <- proc.time()
 boundary.shapefile <- readOGR(LinkBoundaryFile)

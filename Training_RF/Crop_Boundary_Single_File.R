@@ -9,9 +9,18 @@ library(rgdal)
 
 cat('===== START [Crop_Boundary_Single_Files.R] =====\n')
 
+# Get directory of the script (this part only work if source the code, wont work if run directly in the console)
+# This can be set manually !!! -->setwd('bla bla bla')
+script.dir <- dirname(sys.frame(1)$ofile)
+script.dir <- paste0(script.dir, '/')
+setwd(script.dir)
+
+# Create folder to store the result (will show warnings if the folder already exists --> but just warning, no problem)
+dir.create(file.path('Generate/Cropped/'), showWarnings = TRUE)
+
 # Step 1: Read TIF file and shapefile
-LinkTIF <- '~/DuyNguyen/RProjects/OUCRU JE/Figures/[Python] Result Model EM/Rescale_TVT_Once/Land/Endemic_EM_Rescale_Full_Cov_TVT_Once_400_Land.tif'
-LinkSHP <- '~/DuyNguyen/RProjects/OUCRU JE/Data JE/FOI Shapefile Full/Indo_Map/gadm36_IDN_1.shp' # Example: This is a Indonesia shapefile
+LinkTIF <- 'Data/Downloaded_Data/Pigs/Pigs.tif'
+LinkSHP <- 'Data/Shapefile_Endemic/Ende_map_feed.shp' # Example: This is a Indonesia shapefile
 
 map.origin <- raster(LinkTIF)
 shapefile <- readOGR(LinkSHP) 
@@ -24,7 +33,7 @@ map.crop <- crop(map.origin, extent(shapefile))
 map.boundary <- mask(map.crop, shapefile)
 
 # Step 4: Save file (optional)
-SaveName <- 'Full_Cov_TVT_Once_400_Land_IDN'
-writeRaster(map.boundary, SaveName, format = "GTiff")
+SaveName <- 'Cropped_Map'
+writeRaster(map.boundary, paste0('Generate/Cropped/', SaveName), format = "GTiff")
 
 cat('===== FINISH [Crop_Boundary_Single_Files.R] =====\n')

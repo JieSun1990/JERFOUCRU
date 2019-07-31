@@ -19,6 +19,15 @@ library(sp)
 
 cat('===== START [Calibrate_Raster_All_Files.R] =====\n')
 
+# Get directory of the script (this part only work if source the code, wont work if run directly in the console)
+# This can be set manually !!! -->setwd('bla bla bla')
+script.dir <- dirname(sys.frame(1)$ofile)
+script.dir <- paste0(script.dir, '/')
+setwd(script.dir)
+
+# Create folder to store the result (will show warnings if the folder already exists --> but just warning, no problem)
+dir.create(file.path('Generate/Calibrated/'), showWarnings = TRUE)
+
 agg.fun <- function(x, ...){
     return(sum(x))
 }
@@ -55,9 +64,10 @@ Reproject_Aggregate <- function(origin, crs = "+proj=eqc +lat_ts=0 +lat_0=0 +lon
     
 }
 
-Resample_Raster <- function(origin, reference, method = 'bilinear', savefile = TRUE, savename = "Temp_Resample"){
+Resample_Raster <- function(origin, reference, method = 'bilinear', savefile = TRUE, savename = "Temp_Resample", Save_path = 'Generate/Calibrated/'){
     # method = 'ngb --> nearest neighbor --> category data
     # method = 'bilinear' --> bilinear regression --> continuous data
+    # Save_path: Directory to the folder where you want to save the cropped maps to
     
     resample <- resample(origin, reference, method = method)
     
@@ -68,7 +78,7 @@ Resample_Raster <- function(origin, reference, method = 'bilinear', savefile = T
         cat("Resample successfully --> Match criteria to be saved --> Can save file\n")
         if (savefile == TRUE){
             cat("savefile parameter is TRUE --> SAVING ... \n")
-            writeRaster(resample, savename, overwrite = TRUE, format = "GTiff")
+            writeRaster(resample, paste0(Save_path, savename), overwrite = TRUE, format = "GTiff")
             cat("DONE SAVING!\n")
         }else{
             cat("savefile parameter is FALSE --> DONT SAVE!\n")
@@ -126,11 +136,12 @@ Calibrate_Raster_Folder <- function(Folder, reference,
 
 # EXAMPLE TO PERFORM FOR ENTIRE FOLDERS
 # Listmethod: 1 --> ngb, 2 --> bilinear, 3 --> sum
-WholeData <- '/home/ubuntu/Data/'
-ListData <- c('WorldPop_Population_Endemic/')
-ListResolution_Reproject <- c(1) # integer in km x km (original convert from CRS: 0.00833 deg = 1km = 30 seconds)
-ListMethod_Reproject <- c(2) # possible value: 1, 2
-ListMethod_Aggregate <- c(3) # possible value: 1, 2, 3
+# Note that Method_Aggregate for Population need to be 3: sum
+WholeData <- 'Generate/Cropped/'
+ListData <- c('Pigs/', 'Bioclimate/') # List subfolders in WholeData
+ListResolution_Reproject <- c(5, 1) # integer in km x km (original convert from CRS: 0.00833 deg = 1km = 30 seconds)
+ListMethod_Reproject <- c(2, 2) # possible value: 1, 2
+ListMethod_Aggregate <- c(2, 2) # possible value: 1, 2, 3
 
 FileRef <- '/home/ubuntu/Data/WaterMask_Resample/Water_Mask_Endemic_v3_Resample.tif'
 Ref.resample <- raster(FileRef)
