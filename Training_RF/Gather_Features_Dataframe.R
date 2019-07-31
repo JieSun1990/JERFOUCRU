@@ -12,16 +12,23 @@ library(prodlim)
 
 cat('===== START [Gather_Features_Dataframe.R] =====\n')
 
-# =================== CREATE RDS FILE (NOT ADJUSTED COLNAMES) ===================
-rm(list = ls())
+# Get directory of the script (this part only work if source the code, wont work if run directly in the console)
+# This can be set manually !!! -->setwd('bla bla bla')
+script.dir <- dirname(sys.frame(1)$ofile)
+script.dir <- paste0(script.dir, '/')
+setwd(script.dir)
 
+# Create folder to store the result (will show warnings if the folder already exists --> but just warning, no problem)
+dir.create(file.path('Generate/Dataframe/'), showWarnings = TRUE)
+
+# =================== CREATE RDS FILE (NOT ADJUSTED COLNAMES) ===================
 Match_Feature <- function(ref.df, ft.df){
   # Matching coordinate points in feature dataframe ft.df with points in reference dataframe ref.df (having same coordinates)
   # if ft.df does not have points in ref.df --> these points in ft.df are NA
   # Points in ref.df and ft.df have to be same in CRS, resolution, extents --> make sure they match to each other
   # Both dataframes have 3 columns naming values, x, y
   # Input
-  #   ref.df: reference dataframe containing coordinates that will be used to to match with ft.df
+  #   ref.df: reference dataframe containing coordinates that will be used to to match with ft.df (should be bioclimatic feature as they dont have any missing values --> full of coordinates)
   #   ft.df: feature dataframe want to match the values to the corresponding coordinates in ref.df
   # Output
   #   A dataframe containing coordinate points from ref.df, values from ft.df (or NA if missing)
@@ -50,7 +57,7 @@ Match_Feature <- function(ref.df, ft.df){
   return(Match)
 }
 
-WholeData <- "/home/duynguyen/DuyNguyen/RProjects/OUCRU JE/Data JE/Data_Resample_v3/"
+WholeData <- "Generate/Calibrated/"
 folders <- list.dirs(path = WholeData, full.names = FALSE, recursive = FALSE) # list all names of folders in the WholeData Link
 flag <- 0 # checked if any specific map is chosen or not
 for (idx.folders in 1:length(folders)){
@@ -78,7 +85,7 @@ for (idx.folders in 1:length(folders)){
       colnames(Endemic.df)[ncol(Endemic.df)] <- colnames(Match)[1]
       rm(Match)
     }
-    saveRDS(Endemic.df, file = "Endemic_DF.Rds")
+    saveRDS(Endemic.df, file = paste0("Generate/Dataframe/Original_Features_Endemic.Rds"))
   }
 }
 
