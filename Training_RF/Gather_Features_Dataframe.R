@@ -3,7 +3,8 @@
 # This dataframe will be used for the Random Forest Model later
 # The calibrated TIF files need to be well-organized in a folder (applicable with subfolders)
 # The last part is used to rename the column names in the dataframe (since the original is messy)
-# SINCE I HAVE RUN THE CODE FOR YOU --> IF YOU WANT TO EXTRACT LAND-PIXEL --> RUN THE EXTRACT LAND PIXEL part
+# We also only use land-pixels. Land-pixels are pixels that are classified as land area, meaning that their values in WM feature is 0.
+# Note that if values in WM feature is NA --> we also consider it is a land pixel (assign 0 to NA values)
 # ---------- #
 
 library(sp)
@@ -86,15 +87,17 @@ for (idx.folders in 1:length(folders)){
       colnames(Endemic.df)[ncol(Endemic.df)] <- colnames(Match)[1]
       rm(Match)
     }
-    saveRDS(Endemic.df, file = paste0("Generate/Gather_DF/Original_Features_Endemic.Rds"))
+    saveRDS(Endemic.df, file = paste0("Generate/Gather_DF/Original_Features_Endemic_Water_Land.Rds"))
   }
 }
 
 ## =================== EXTRACT LAND PIXEL ===================
-## You can save the Land-pixel only --> pixel that have Water value (from the Water classification map) = 0 is land
-# Endemic.df <- readRDS('Generate/Dataframe/Original_Features_Endemic.Rds')
-# Endemic.df.land <- Endemic.df[which(Endemic.df$WM == 0), ] # remember to change to column name. Here WM is the column for Water-Land classification
-# saveRDS(Endemic.df.land, file = paste0("Generate/Dataframe/Original_Features_Endemic_Land.Rds"))
+Endemic.df.land <- readRDS("Generate/Gather_DF/Original_Features_Endemic_Water_Land.Rds")
+# Here WM is the column for Water-Land classification
+Endemic.df.land$WM[which(is.na(Endemic.df.land$WM))] <- 0 # Assign 0 to NA values in Water-Land category feature --> 0 means Land area
+Endemic.df.land <- Endemic.df.land[which(Endemic.df.land$WM == 0), ] # only take pixels have WM values are 0 --> land pixels
+Endemic.df.land$WM <- NULL # Since the values in the WM column are all 0 --> can remove it!
+saveRDS(Endemic.df.land, file = paste0("Generate/Gathered_DF/Original_Features_Endemic.Rds"))
 
 # Studies.df <- Endemic.df[!is.na(Endemic.df$FOI), ] # Take pixels that have FOI values from catalytic models --> Use this dataframe to train and evaluate the RF model
 # Studies.df.land <- Studies.df[which(Studies.df$WM == 0), ] # Take the land pixels
