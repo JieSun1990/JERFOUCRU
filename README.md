@@ -22,9 +22,9 @@ Because the downloaded data as well as some other intensive data are difficult t
 0. Download TIF file from the internet and convert FOI shapefile to raster map
 1. Crop the downloaded file (within the boundary of a shapefile, e.g Endemic shapefile). [(Go to Step 1)](#step-1-crop-boundary-of-downloaded-tif-files)
 2. Calibrate the cropped file. [(Go to Step 2)](#step-2-reprojectaggregateresample-cropped-tif-files)
-2.1: Reproject to the specific CRS and convert to corresponding resolution in the new CRS
-2.2: Aggregate to the specific resolution (e.g from 1x1km aggregate to 5x5km)
-2.3: Resample to ensure all files share same coordinates (need to decide which file is the reference map)
+<br/>2.1: Reproject to the specific CRS and convert to corresponding resolution in the new CRS
+<br/>2.2: Aggregate to the specific resolution (e.g from 1x1km aggregate to 5x5km)
+<br/>2.3: Resample to ensure all files share same coordinates (need to decide which file is the reference map)
 3. Gather all calibrated maps to create dataframe including features and outcome (FOI) columns. [(Go to Step 3)](#step-3-create-a-dataframe-including-all-information-of-calibrated-tif-files)
 4. Run randomForestSRC to impute the missing values in the dataframe. [(Go to Step 4)](#step-4-use-randomforestsrc-to-run-the-imputation-random-forest-not-the-prediction-model)
 5. Perform Overlay Adjustment to find out the exactly mean FOI values of the non-overlay regions. [(Go to Step 5)](#step-5-perform-overlay-adjustment-in-foi)
@@ -88,30 +88,34 @@ Extract all features values from calibrated maps at each coordinates and gather 
 #### Step 4: Use randomForestSRC to run the imputation random forest (not the prediction model)
 Random Forest also provide the imputation algorithm. To make it independent with the FOI, we can remove the FOI column in the dataframe created in Step 3, then run the imputation random forest. Note that this step requires a large amount of RAM (since R is not a good choice for these kind of techniques) and it will take a long time to finish. I have run this (long time ago), hence we can use this data instead of running this again. We can run this script again when we have new data. 
 <br/>It will be the best if we can adjust population data after the imputation step. The adjust population process will be described in [Part 2](#part-2-generate-cases). After we run the imputation RF model, we can run **Adjust_Pop_To_Match_UN** function and match their result values to the imputed dataframe. Here we have matched it for you.
+<br/>After we imputed missing values for the dataframe representing entire endemic areas, we extracted Study Catchment Area dataframe. This Study dataframe only contains pixels that have FOI values, which were obtained by fitting catalytic model to age-stratified cases data. 
 
 **Input**
-<br/> We will use Random Forest to impute the missing values in the gathered dataframe from Step 3. Note that we will remove the FOI column to make it not bias to the FOI values.
+<br/> We will use Random Forest to impute the missing values in the gathered dataframe from Step 3. Note that we will remove the FOI column during the imputation step to make features not bias to the FOI values.
 
 **Output**
-<br/> The imputed dataframe named **Imputed_Features_Endemic.Rds** will be created at **_Generate/Imputed_DF/_** folder.
+<br/> The imputed dataframe named **Imputed_Features_Endemic.Rds**, and **Imputed_Features_Study.Rds** will be created at **_Generate/Imputed_DF/_** folder.
 
 **Functions**
 - **Imputation_RF**: Run the imputation Random Forest Model to impute missing values in each features **_(Not yet included)_**
 - **Evaluate_Imputation**: Try to evaluate the imputation of RF by creating pseudo-NA data. Some of non-NA positions at each feature will be assigned NA, then run the RF to impute these values again. We will use R-squared to evaluate the accuracy of the imputation RF. **_(Not yet included)_**
+- **Extract_Study_Dataframe**: Extract Study Catchment Area dataframe from imputed Endemic data frame.
 
 #### Step 5: Perform Overlay adjustment in FOI
-This step is one of the most complicated steps. This step will use the Study Catchment Area dataframe. This Study dataframe is extracted from the imputed endemic dataframe (result from Step 4). This dataframe only contains pixels that have FOI values, which were obtained by fitting catalytic model to age-stratified cases data. There is an issue (called **_Overlay_** issue) in a calibrated FOI TIF file. The Overlay issue is the case that some catchment areas lie inside other catchment areas. In this case, we assume that the catalytic modelled FOI value of the big catchment area will be the mean of FOI values of all pixels that lie in the big regions (including pixels that lie in smaller catchment areas but belong to the bigger one). Therefore, the FOI values of pixels that are in the big catchment area but not inside smaller catchment areas need to be adjusted to constrain with the assumption.
+This step is one of the most complicated steps. This step will use the Study Catchment Area dataframe. There is an issue (called **_Overlay_** issue) in a calibrated FOI TIF file. The Overlay issue is the case that some catchment areas lie inside other catchment areas. In this case, we assume that the catalytic modelled FOI value of the big catchment area will be the mean of FOI values of all pixels that lie in the big regions (including pixels that lie in smaller catchment areas but belong to the bigger one). Therefore, the FOI values of pixels that are in the big catchment area but not inside smaller catchment areas need to be adjusted to constrain with the assumption.
 
 **Input**
-<br/> This script will use **Imputed_Feature_Endemic.Rds** to extract Study dataframe, called **Imputed_Feature_Studies.Rds**. Then we will perform Overlay adjustment in the Study dataframe.
+<br/> This script will use **Imputed_Feature_Studies.Rds**. We will perform Overlay adjustment in the Study dataframe.
+<br/> For complicated Overlay problems in India and Nepal, we will need the their shapefiles, which indicate the boundaries of subregions in the countries. We put the shapefiles in **_Data/Shapefile_Overlay/_** folder.
 
 **Output**
-<br/> Beside **Imputed_Features_Studies.Rds** (stored in **_Generate/Imputed_DF/_** folder), the overlay adjusted dataframe named **TBD** will be created at **_Generate/Overlay_Adjust_DF/_** folder.
+<br/> **Assign_Regions_For_Adjust_Overlay** will create a dataframe **Coordinates_Index_Study.Rds** (in **_Generate/Overlay_DF/_** folder) and list of TIF files (in **_Generate/Overlay_TIF/_** folder). The dataframe includes coordinates of pixels and their corresponding study indexes. These indexes are visualized through the list of TIF files.
+<br/>**Adjust_Overlay** will create the overlay adjusted dataframe, which is the main result, named **Adjusted_Overlay_Study** (in **_Generate/Overlay_DF/_** folder). This dataframe includes 4 columns: x-y coordinates, adjusted overlay FOI values, and study indexes.
 
 **Functions**
 - **Assign_Regions_For_Adjust_Overlay**: Assign index for pixels having the same FOI values (which means these pixels will belong in the same regions). These indexes will be used to check which regions are overlay or non-overlay. (This checking part is done manually by viewing on QGIS with the highest level of carefulness)
 - **Regions_Index_Information**: This script just provides information about indexes generated by **Assign_Regions_For_Adjust_Overlay**. By looking at this script, we will know how the regions affect others. And use this information to run **Adjust_Overlay**. This script is created manually by doing analysis and observing regions on QGIS.
-- **Adjust_Overlay**: Run the overlay adjustment after you knew which regions are overlay and non-overlay. You need to know how the regions overlay (e.g. which region indexes are inside other indexes)
+- **Adjust_Overlay**: Only run after you did run **Assign_Regions_For_Adjust_Overlay**. Run the overlay adjustment after you knew which regions are overlay and non-overlay. You need to know how the regions overlay (e.g. which region indexes are inside other indexes)
 
 #### Step 6: Perform EM to disaggregate FOI values
 Run EM to disaggregate FOI values to each pixels. The constrain is that the FOI value at 1 region will be the mean of FOI of all pixels belong to that region. Here we implemented EM algorithm based from **_flowerdew1992_** article. We need 2 extra features related to FOI. 1 of 2 features need to have a positive correlation with the FOI. By plotting correlationship graph, we choose Bio_15 is the positive correlation feature. The second feature is Bio_04, which is the most important features after running Random Forest (imputing). 
@@ -159,8 +163,8 @@ This folder includes scripts, Data folder and Generate folder.
 
 ### Functions
 - **Assign_Endemic_Regions**: assign a country index for each pixel to indicate which countries that the pixel belongs to → The results will be saved as 2 files: **_Coord_Regions_Final.Rds_** and **_Country_Index.Rds_** (These 2 files will be used in **_COMPARING WITH WHO-IG_** Part also)
+- **Adjust_Pop_To_Match_UN**: Calibrate population data from map (store in a dataframe of RF) to match with the UN population. Note that for countries that endemic areas are entire countries, we will match with the UN data, however for countries that endemic areas are a part of their countries we will match with the Quan’s subnational data (PAK, RUS, AUS) → The result will be saved as **_Adjusted_Pop_Map.Rds_**
 - **Extract_Age_Distribution_Population**: Take the age distribution population data from Quan data and only keep data in the year 2015. Meanwhile, also remove some regions that Quan did not use to generate cases
-- **Adjust_Pop_To_Match_UN**: Calibrate population data from map (store in a dataframe of RF) to match with the UN population. Note that for countries that endemic areas are entire countries, we will match with the UN data, however for countries that endemic areas are a part of their countries we will match with the Quan’s subnational data (PAK, RUS, AUS) → The result will be saved as *Adjusted_Pop_Map.Rds*
 - **Generate_Cases_Dataframe**: Generate cases at each pixel at each ages from 0 to 99 → The result will be 101 Rds files. Each file is the cases at 1 age, the last file is the total cases of all age group (Sum of 100 previous files)
 - **Generate_Cases_Map**: Convert above 101 Rds files into 101 raster maps (but we should only plot the total cases of all ages at each pixel). This function is just the same as **Create_Raster_From_Dataframe** but more specific to plot a Rds file.
 - **Generate_Cases_Map_Country**: Plot the shapefile map (not raster) in which values representing for each country is the total cases of entire country

@@ -11,9 +11,15 @@ library(rgdal)
 
 cat('===== START [Adjust_Overlay.R] =====\n')
 
-df.origin <- readRDS('/home/duynguyen/DuyNguyen/RProjects/OUCRU JE/Data JE/Data_RF/AllDF_regions.Rds')
+## Get directory of the script (this part only work if source the code, wont work if run directly in the console)
+## This can be set manually !!! -->setwd('bla bla bla')
+script.dir <- dirname(sys.frame(1)$ofile)
+script.dir <- paste0(script.dir, '/')
+setwd(script.dir)
 
-SHPPath <- '/home/duynguyen/DuyNguyen/RProjects/OUCRU JE/Data JE/FOI Shapefile Full/'
+df.origin <- readRDS(paste0('Generate/Overlay_DF/', 'Coordinates_Index_Study.Rds'))
+
+SHPPath <- 'Data/Shapefile_Overlay/'
 SHPPath_India <- paste0(SHPPath, 'India_Map/')
 SHPPath_Nepal <- paste0(SHPPath, 'Nepal_Map/')
 
@@ -165,7 +171,7 @@ for(country.needadjust in needadjust){
   rm(df.country)
 }
 
-saveRDS(df.origin, 'AllDF_Adjusted_WP_Land_Imputed_Land.Rds')
+saveRDS(df.origin, paste0('Generate/Overlay_DF/', 'Adjusted_Overlay_Study.Rds'))
 
 cat('===== FINISH [Adjust_Overlay.R] =====\n')
 

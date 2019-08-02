@@ -99,11 +99,6 @@ Endemic.df.land <- Endemic.df.land[which(Endemic.df.land$WM == 0), ] # only take
 Endemic.df.land$WM <- NULL # Since the values in the WM column are all 0 --> can remove it!
 saveRDS(Endemic.df.land, file = paste0("Generate/Gathered_DF/Original_Features_Endemic.Rds"))
 
-# Studies.df <- Endemic.df[!is.na(Endemic.df$FOI), ] # Take pixels that have FOI values from catalytic models --> Use this dataframe to train and evaluate the RF model
-# Studies.df.land <- Studies.df[which(Studies.df$WM == 0), ] # Take the land pixels
-# saveRDS(Studies.df, file = paste0("Generate/Dataframe/Original_Features_Studies.Rds"))
-# saveRDS(Studies.df.land, file = paste0("Generate/Dataframe/Original_Features_Studies_Land.Rds"))
-
 ## ================ ADJUST COLNAMES =================
 ## Need to run this part (but have to change manually based on your context)
 # rm(list =ls())

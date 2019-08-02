@@ -3,14 +3,12 @@
 # This script is created by doing analysis and observing on QGIS
 # The information is about how the regions connected with other overlay regions
 # We can also use this information to extract interested countries (or regions) dataframe
+#
+#
+# If we change anything in the Data/Shapefile_FOI folder (add or remove studies) --> this file might be not correct anymore!
 # ---------- #
 
 cat('===== START [Regions_Index_Information.R] =====\n')
-
-rm(list = ls())
-
-DataPath <- '/home/duynguyen/DuyNguyen/RProjects/OUCRU JE/Data JE/Data_RF/AllDF_regions.Rds'
-df.allregions <- readRDS(DataPath)
 
 # ---------- China ----------
 # QGIS Extract Code:
@@ -203,13 +201,21 @@ SriLanka.region <- c(48)
 
 Indonesia.region <- c(50, 51)
 
-# ---------- Example of Extract Countries of Interest ------------
+# ---------- Example of Extract Countries of Interest as dataframe ------------
+## Get directory of the script (this part only work if source the code, wont work if run directly in the console)
+## This can be set manually !!! -->setwd('bla bla bla')
+# script.dir <- dirname(sys.frame(1)$ofile)
+# script.dir <- paste0(script.dir, '/')
+# setwd(script.dir)
+
+# DataPath <- 'Generate/Overlay_DF/Coordinates_Index_Study.Rds'
+# df.allregions <- readRDS(DataPath)
 # name <- 'Indonesia'
 # interest.region <- Indonesia.region
 # 
 # idx.region <- which(df.allregions$Region %in% interest.region)
 # df.region <- df.allregions[idx.region,]
 # 
-# saveRDS(df.region, paste0(name, '_DF.Rds'))
+# saveRDS(df.region, paste0(name, '_DF.Rds')) # Use this dataframe to create a TIF file
 
 cat('===== FINISH [Regions_Index_Information.R] =====\n')
