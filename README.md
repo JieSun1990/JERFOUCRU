@@ -154,7 +154,7 @@ Basically, this is not a complicated step. Based on your wishes, you can plot th
 - **Create_Raster_From_Dataframe**: Create a raster (map) as a TIF file from a dataframe in R. The dataframe has 3 columns: x, y (coordinates of a pixel), values (values that we want to visualize in a map).
 - **Calculate_NA_Proportion**: Find the missing portion of each feature in the original dataframe (original means before imputing step)
 - **Dataframe_To_CSV**: Convert Rds (dataframe) to csv files so that Python can read the data to run Random Forest
-- **Plot_Correlation_Matrix**: Plot the correlation coefficient between features and the FOI values. Can use this for choosing a feature that have strong positive (negative) relationship with FOI and use that feature in **EM_Disaggregation**
+- **Plot_Correlation_Matrix**: Plot the correlation coefficient between features and the FOI values. Can use this for choosing a feature that have strong positive (negative) relationship with FOI and use that feature in [**EM_Disaggregation**](#step-6-perform-em-to-disaggregate-foi-values). The input can plot the correlation matrix based on Overlay Adjustment dataframe (main reason), or based on EM Disaggregation dataframe. The second option can only run after you ran the [EM Step](#step-6-perform-em-to-disaggregate-foi-values).
 
 ## PART 2. GENERATE CASES 
 This folder includes scripts, Data folder and Generate folder.
