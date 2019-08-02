@@ -10,6 +10,15 @@ library(rgdal)
 
 cat('===== START [EM_Disaggregate.R] =====\n')
 
+## Get directory of the script (this part only work if source the code, wont work if run directly in the console)
+## This can be set manually !!! -->setwd('bla bla bla')
+script.dir <- dirname(sys.frame(1)$ofile)
+script.dir <- paste0(script.dir, '/')
+setwd(script.dir)
+
+## Create folder to store the result (will show warnings if the folder already exists --> but just warning, no problem)
+dir.create(file.path('Generate/EM_DF/'), showWarnings = TRUE)
+
 # =========== DEFINE OWN FUNCTIONS ===========
 Convert_Range <- function(xold, oldrange, newrange){
   # Convert xold value from oldrange [A, B] to new value in newrange [C, D]
@@ -139,11 +148,22 @@ disaggregate_EM <- function(A.s, A.st, X.t, Y.s, max_iter = 10000, tol = 0.0001,
 }
 
 # ============ PROCESS =============
-df.origin <- readRDS("~/DuyNguyen/RProjects/OUCRU JE/Data JE/Data_RF/AllDF_Adjusted_WP_Land_Imputed_Land.Rds")
-cov_names <- colnames(df.origin)
-df.EM <- df.origin[ , c(1, 2, which(cov_names == 'Bio_15'), which(cov_names == 'Bio_04'), 
-                        which(cov_names == 'FOI'), which(cov_names == 'Region'))]
-rm(df.origin)
+df.Overlay <- readRDS(paste0('Generate/Overlay_DF/', 'Adjusted_Overlay_Study.Rds'))
+df.Ft <- readRDS(paste0('Generate/Imputed_DF/', 'Imputed_Features_Study.Rds'))
+
+check <- all(identical(df.Overlay$x, df.Ft$x), identical(df.Overlay$y, df.Ft$y)) # Check if coordinates in 2 dataframe are the same
+
+if (!check){
+    cat('Coordinates DO NOT match! --> STOP!!!\n')
+    return()
+}
+
+cov_names <- colnames(df.Ft)
+Ft1 <- df.Ft[[which(cov_names == 'Bio_15')]] # Ft1 is feature that need to have positive correlation with FOI --> Plot Correlation Matrix to find the feature
+Ft2 <- df.Ft[[which(cov_names == 'Bio_04')]] # Ft2 is the most important feature that related to the FOI --> run RF model on small set and see variable importance
+df.EM <- data.frame(x = df.Ft$x, y = df.Ft$y, 
+                    Ft1 = Ft1, Ft2 = Ft2, 
+                    FOI = df.Overlay$FOI, Region = df.Overlay$Region)
 
 # currently, impute missing data base on mean (if we dont run imputed by random forest first)
 df.EM[[3]][which(is.na(df.EM[[3]]))] <- mean(df.EM[[3]], na.rm = TRUE)
@@ -228,34 +248,18 @@ rm(y.st, A.st, X.t)
 ## Save the EM dataframe
 df.EM$Disaggregate <- data.disaggregate
 df.EM <- df.EM[order(-df.EM$y, df.EM$x), ]
-saveRDS(df.EM, 'EM_FOI.Rds')
 
-## Create raster map
-t1 <- create_raster_from_df(df.EM[, c(1, 2, 7)], name = 'EM_FOI_Land_Nepal_India', savefile = TRUE)
-rm(t1)
-
-## ===== ONLY RUN IF ALREADY FINISH ABOVE CODE ===== ##
-## ---------- Matching EM result with other covariates dataframe by matching their corresponding coordinates----------
-DataPath_EM <- '/home/duynguyen/DuyNguyen/RProjects/OUCRU JE/Data JE/Result EM/'
-df.EM <- readRDS(paste0(DataPath_EM, 'EM_FOI_WP_Imputed_Land_rescale.Rds'))
-
-DataPath_AllDF <- '/home/duynguyen/DuyNguyen/RProjects/OUCRU JE/Data JE/Data_RF/'
-df.AllDF.Imputed <- readRDS(paste0(DataPath_AllDF, 'AllDF_WP_Imputed_Land.Rds'))
-
-difx <- sum(abs(df.EM$x - df.AllDF.Imputed$x))
-dify <- sum(abs(df.EM$y - df.AllDF.Imputed$y))
-if (difx == 0 && dify == 0){
-  cat('Matched Coordinators\n')
-}else{
-  cat('DO NOT MATCH Coordinators --> END!!!\n')
-  return()
+# Check matching coordinates --> just to make sure since df.EM coordinates is made from df.Ft
+check <- all(identical(df.EM$x, df.Ft$x), identical(df.EM$y, df.Ft$y)) # Check if coordinates in 2 dataframe are the same
+if (!check){
+    cat('Coordinates DO NOT match! --> STOP!!!\n')
+    return()
 }
 
-df.AllDF.Imputed$FOI <- df.EM$Disaggregate
+df.Ft$FOI <- df.EM$Disaggregate
+saveRDS(df.Ft, paste0('Generate/EM_DF/', 'EM_Imputed_Features_Study.Rds'))
 
-## Save the dataframe and convert to CSV for python
-saveRDS(df.AllDF.Imputed, 'AllDF_EM_rescale_Imputed_Land.Rds')
-
-# write.csv(df.AllDF.Imputed, 'AllDF_EM_rescale_Imputed_Land.csv', row.names = FALSE)
+## Create raster map
+# You can create a raster map to visualize the EM FOI values map
 
 cat('===== FINISH [EM_Disaggregate.R] =====\n')

@@ -110,7 +110,7 @@ This step is one of the most complicated steps. This step will use the Study Cat
 
 **Output**
 <br/> **Assign_Regions_For_Adjust_Overlay** will create a dataframe **Coordinates_Index_Study.Rds** (in **_Generate/Overlay_DF/_** folder) and list of TIF files (in **_Generate/Overlay_TIF/_** folder). The dataframe includes coordinates of pixels and their corresponding study indexes. These indexes are visualized through the list of TIF files.
-<br/>**Adjust_Overlay** will create the overlay adjusted dataframe, which is the main result, named **Adjusted_Overlay_Study** (in **_Generate/Overlay_DF/_** folder). This dataframe includes 4 columns: x-y coordinates, adjusted overlay FOI values, and study indexes.
+<br/>**Adjust_Overlay** will create the overlay adjusted dataframe, which is the main result, named **Adjusted_Overlay_Study.Rds** (in **_Generate/Overlay_DF/_** folder). This dataframe includes 4 columns: x-y coordinates, adjusted overlay FOI values, and study indexes.
 
 **Functions**
 - **Assign_Regions_For_Adjust_Overlay**: Assign index for pixels having the same FOI values (which means these pixels will belong in the same regions). These indexes will be used to check which regions are overlay or non-overlay. (This checking part is done manually by viewing on QGIS with the highest level of carefulness)
@@ -119,6 +119,14 @@ This step is one of the most complicated steps. This step will use the Study Cat
 
 #### Step 6: Perform EM to disaggregate FOI values
 Run EM to disaggregate FOI values to each pixels. The constrain is that the FOI value at 1 region will be the mean of FOI of all pixels belong to that region. Here we implemented EM algorithm based from **_flowerdew1992_** article. We need 2 extra features related to FOI. 1 of 2 features need to have a positive correlation with the FOI. By plotting correlationship graph, we choose Bio_15 is the positive correlation feature. The second feature is Bio_04, which is the most important features after running Random Forest (imputing). 
+
+**Input**
+<br/> We will need the Overlay Adjusted FOI values and Study Index from **Adjusted_Overlay_Study.Rds** [(Step 5)](#step-5-perform-overlay-adjustment-in-foi) and Imputed Features from **Imputed_Features_Study.Rds** [(Step 4)](#step-4-use-randomforestsrc-to-run-the-imputation-random-forest-not-the-prediction-model). We will need to check whether 2 coordinates columns from 2 dataframes match or not.
+
+**Output**
+<br/> This script will create a dataframe **EM_Imputed_Features_Study.Rds** in **_Generate/EM_DF/_** folder. This dataframe contains coordinates of all Study Catchment Area pixels and their imputed features values along with EM Disaggregated FOI values.
+
+**Function**
 - **EM_Disaggregate**: Perform EM and save dataframe to Rds, also write to CSV file in order to let Python can read the file and train the Random Forest model.
 
 #### Step 7: Create Grids to divide dataset into 3 subset: Train-Validate-Test
