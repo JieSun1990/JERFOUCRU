@@ -23,12 +23,13 @@ create_raster_from_df <- function(dataframe, res = c(5, 5),
     return(rasterdf)
 }
 
-Link_file <- '/home/duynguyen/DuyNguyen/PythonProjects/OUCRU_JE/Result with Coor/EM/RescaleTVT_Once/Land/Endemic_result_Full_Cov_TVT_Land_400.csv'
+Link_file <- 'Directory/to/your/Rds/files.csv' # or to RDS is also ok
 df <- read.csv(Link_file, sep = '\t') # Read CSV --> Can chage to readRDS (if the file is RDS file)
 
 df.map <- df[, c(1, 2, 3)] # only take 3 columns: x, y (2 coordinates column) and the last column will be the values of pixels in the map (Here will be FOI)
 
-Namefile = 'Endemic_EM_Rescale_Full_Cov_TVT_Once_400_Land' # Name to save the file
-raster <- create_raster_from_df(df.map, name = Namefile, savefile = TRUE)
+Savepath <- 'Directory/to/your/saved/folder/' # note that need a slash "/" at the end
+Namefile = 'Name_TIF_File' # Name to save the file (DONT need to have extension format, like: .csv, .tif)
+raster <- create_raster_from_df(df.map, name = paste0(Savepath, Namefile), savefile = TRUE)
 
 cat('===== FINISH [Create_Raster_From_Dataframe.R] =====\n')
