@@ -13,6 +13,17 @@ library(rgdal)
 
 cat('===== START [Create_Sampling_Grids.R] =====\n')
 
+## Get directory of the script (this part only work if source the code, wont work if run directly in the console)
+## This can be set manually !!! -->setwd('bla bla bla')
+script.dir <- dirname(sys.frame(1)$ofile)
+script.dir <- paste0(script.dir, '/')
+setwd(script.dir)
+
+## Create folder to store the result (will show warnings if the folder already exists --> but just warning, no problem)
+dir.create(file.path('Generate/Grids_CSV/'), showWarnings = TRUE)
+
+Savepath <- 'Generate/Grids_CSV/'
+
 # Create Grid for sampling samples
 
 create_raster_from_df <- function(dataframe, res = c(5, 5),
@@ -92,12 +103,12 @@ assignGrid <- function(dataframe, dataGrid){
 }
 
 # Take extent of a Calibrated map (use extent to limit xmax, xmin, ymax, ymin coordinates)
-MapFOI <- raster('/home/duynguyen/DuyNguyen/RProjects/OUCRU JE/Data JE/Data_Resample_v3/FOI/Adjusted_FOI_Map_Endemic_v3_Resample.tif')
+MapFOI <- raster('Generate/Calibrated/FOI/FOI_Map_Calibrated.tif')
 extentMap <- extent(MapFOI)
 rm(MapFOI)
 
 # Take the coordinates of all pixels that contain FOI values (we dont take pixels do not have FOI into account)
-dataframe <- readRDS('/home/duynguyen/DuyNguyen/RProjects/OUCRU JE/Data JE/Data_RF/AllDF_Adjusted_WP_Land_Imputed_Land.Rds')
+dataframe <- readRDS('Generate/EM_DF/EM_Imputed_Features_Study.Rds')
 dataframe <- dataframe[, c(1,2)]
 dataframe$Grid <- 0
 
@@ -106,7 +117,8 @@ xmax <- extentMap@xmax
 ymin <- extentMap@ymin
 ymax <- extentMap@ymax
 extentGrid <- c(xmin, xmax, ymin, ymax)
-resolution_vec <- c(200, 300, 400, 500) # Resolution of 1 grid (in kilometers)
+# We generate 4 Grids files with 4 different setup (we can reduce to 1 resoluton 400x400 only)
+resolution_vec <- c(200, 300, 400, 500) # Resolution of each grid (in kilometers)
 for (idx_resolution in 1 : length(resolution_vec)){
     resolution <- resolution_vec[idx_resolution]
     cat('Grid resolution (km):', resolution, ' x ', resolution, '\n')
@@ -120,7 +132,7 @@ for (idx_resolution in 1 : length(resolution_vec)){
     n_valid_grid <- length(valid_grid)
     cat('Total Valid Grids:', n_valid_grid, '/ Total Grids:', n_all_grid, '\n==========\n')
     # Save grid into csv file so that Python can read it
-    write.csv(dataframe_grid, paste0('Grid_', resolution, '_', resolution, '.csv'), row.names = FALSE)
+    write.csv(dataframe_grid, paste0(Savepath, 'Grid_', resolution, '_', resolution, '.csv'), row.names = FALSE)
 }
 
 # ----- Plot randomly -----

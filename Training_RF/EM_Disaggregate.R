@@ -30,17 +30,6 @@ Convert_Range <- function(xold, oldrange, newrange){
   return(xnew)
 }
 
-create_raster_from_df <- function(dataframe, res = c(5, 5),
-                                  crs = "+proj=eqc +lat_ts=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=km +no_defs",
-                                  name = 'rasterdf', savefile = FALSE){
-  crs <- crs(crs)
-  rasterdf <- rasterFromXYZ(dataframe, res = res, crs = crs)
-  if (savefile){
-    writeRaster(rasterdf, name, overwrite = TRUE, format = "GTiff")
-  }
-  return(rasterdf)
-}
-
 sum.finite <- function(x){
   return(sum(x[is.finite(x)]))
 }

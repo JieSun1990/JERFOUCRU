@@ -86,7 +86,7 @@ Extract all features values from calibrated maps at each coordinates and gather 
 - **Gather_Features_Dataframe**: Gather all values of calibrated TIF files and create a dataframe containing pixel coordinates and its values for each feature. You also need to rename the column names in the gathered dataframe because the original column names will be messy. Note that before using this script, you need to have the well-organized folders containing the calibrated covariate files.
 
 #### Step 4: Use randomForestSRC to run the imputation random forest (not the prediction model)
-Random Forest also provide the imputation algorithm. To make it independent with the FOI, we can remove the FOI column in the dataframe created in Step 3, then run the imputation random forest. Note that this step requires a large amount of RAM (since R is not a good choice for these kind of techniques) and it will take a long time to finish. I have run this (long time ago), hence we can use this data instead of running this again. We can run this script again when we have new data. 
+Random Forest also provide the imputation algorithm. To make it independent with the FOI, we can remove the FOI column in the dataframe created in [Step 3](#step-3-create-a-dataframe-including-all-information-of-calibrated-tif-files), then run the imputation random forest. Note that this step requires a large amount of RAM (since R is not a good choice for these kind of techniques) and it will take a long time to finish. I have run this (long time ago), hence we can use this data instead of running this again. We can run this script again when we have new data. 
 <br/>It will be the best if we can adjust population data after the imputation step. The adjust population process will be described in [Part 2](#part-2-generate-cases). After we run the imputation RF model, we can run **Adjust_Pop_To_Match_UN** function and match their result values to the imputed dataframe. Here we have matched it for you.
 <br/>After we imputed missing values for the dataframe representing entire endemic areas, we extracted Study Catchment Area dataframe. This Study dataframe only contains pixels that have FOI values, which were obtained by fitting catalytic model to age-stratified cases data. 
 
@@ -130,7 +130,15 @@ Run EM to disaggregate FOI values to each pixels. The constrain is that the FOI 
 - **EM_Disaggregate**: Perform EM and save dataframe to Rds, also write to CSV file in order to let Python can read the file and train the Random Forest model.
 
 #### Step 7: Create Grids to divide dataset into 3 subset: Train-Validate-Test
-Create Sampling Grids (with large resolution: 200, 300, 400, 500km). Use 1 of these options to sample which grids will be used for Training, Validating, and Testing.
+Create Sampling Grids (with large resolution: 200, 300, 400, 500km). One of these Grids will be used for sampling 3 subsets: Training, Validating, and Testing (in Python.
+
+**Input**
+<br/> This script requires Calibrated FOI TIF map ([Step 2](#step-2-reprojectaggregateresample-cropped-tif-files)) and **EM_Imputed_Features_Study.Rds** ([Step 6](#step-6-perform-em-to-disaggregate-foi-values)). We need the extent CRS from the TIF and the coordinates of pixels from the Study dataframe.
+
+**Output**
+<br/> Grids CSV will be created in **_Generate/Grids_CSV/_** folder. This CSV will have 3 columns: x-y coordinates, and the Grid index of each pixel. Grid index indicates which Grid in which the pixel lies.
+
+**Function**
 - **Create_Sampling_Grids**: This script will need the extent (coordinates limitation) of a calibrated FOI map and the coordinates of all pixels in that map. The result will be a dataframe containing 3 columns: x, y (coordinates), and grids index. 
 
 #### Step 8: Train the Random Forest Model
