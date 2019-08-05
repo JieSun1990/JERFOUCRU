@@ -112,6 +112,10 @@ dataframe <- readRDS('Generate/EM_DF/EM_Imputed_Features_Study.Rds')
 dataframe <- dataframe[, c(1,2)]
 dataframe$Grid <- 0
 
+# Uncomment 2 below lines if you want to create small portion of the dataset --> Match with Dataframe_To_CSV.R
+# set.seed(881994)
+# dataframe <- dataframe[sample(1:nrow(dataframe), 10000), ] # --> only sample 10000 pixels
+
 xmin <- extentMap@xmin
 xmax <- extentMap@xmax
 ymin <- extentMap@ymin

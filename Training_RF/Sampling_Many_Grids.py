@@ -20,7 +20,7 @@ Select_Mode = 'Ploting'
 
 CurDir = os.getcwd()
 resolution_grid = 400
-Grid = CurDir + '/Data/Grid_400_400.csv'
+Grid = CurDir + '/Data/Grid_400_400.csv' # Sampling Grids
 Grid = pd.read_csv(Grid)  
 
 Number_of_model = 1
@@ -99,8 +99,8 @@ else: # Ploting Mode --> Create series of csv files
         # ----- Saving -----
         
         if (i < 10):
-            filename = 'Sampling_Grid_0' + str(i) + '.csv'    
+            filename = 'Grid_Index_0' + str(i) + '.csv'    
         else:
-            filename = 'Sampling_Grid_' + str(i) + '.csv'
+            filename = 'Grid_Index_' + str(i) + '.csv'
             
         M.to_csv(filename, sep='\t', encoding='utf-8')

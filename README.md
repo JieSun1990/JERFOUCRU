@@ -11,12 +11,16 @@ Each folder will have similar structure:
 2. **_Data_** folder: containing all of needed data in order to be able to run the scripts
 3. **_Generate_** folder: containing the results after running the scipts (if they produce and save something)
 
-#### SUPPORTED LIBRARY
+#### SUPPORTING LIBRARY [R]
 Need to install the following libraries: sp, raster, rgdal, tidyverse, ggplot2, dplyr, tidyr, rgeos, grid, gridExtra, rprodlim, corrplot, randomForestSRC 
 <br/>Optional: Rcpp, rasterVis, latticeExtra
 
+#### SUPPORTING LIBRARY [Python]
+Need to install the following libraries: warning, os, numpy, pandas, pickle, time, sys, collection, sklearn (Some of them are basic libraries and already installed)
+
+
 ## PART 1. TRAINING RANDOM FOREST
-Because the downloaded data as well as some other intensive data are difficult to upload to Github, I just created empty Data folders. We can copy our data into that folder to run the code.
+Because the downloaded data as well as some other intensive data are difficult to upload to Github, I have run almost the code for you. You can run from Step 8.
 
 ### Work Flow
 0. Download TIF file from the internet and convert FOI shapefile to raster map
@@ -31,7 +35,7 @@ Because the downloaded data as well as some other intensive data are difficult t
 6. Perform EM to disaggregate data. [(Go to Step 6)](#step-6-perform-em-to-disaggregate-foi-values)
 7. Create Train-Validate-Test subset by building a 400x400km grids (or other resolutions). [(Go to Step 7)](#step-7-create-grids-to-divide-dataset-into-3-subset-train-validate-test)
 8. Train the model and save the result. **(Run on Python)** [(Go to Step 8)](#step-8-train-the-random-forest-model)
-9. Plot the result. [(Go to Step 9)](#step-9-plot-the-result)
+9. Plot the feature importance. [(Go to Step 9)](#step-9-plot-the-feature-importance)
 
 ### Core Functions 
 #### Step 0: Convert FOI Shapefile to FOI raster map
@@ -127,7 +131,7 @@ Run EM to disaggregate FOI values to each pixels. The constrain is that the FOI 
 <br/> This script will create a dataframe **EM_Imputed_Features_Study.Rds** in **_Generate/EM_DF/_** folder. This dataframe contains coordinates of all Study Catchment Area pixels and their imputed features values along with EM Disaggregated FOI values.
 
 **Function**
-- **EM_Disaggregate**: Perform EM and save dataframe to Rds, also write to CSV file in order to let Python can read the file and train the Random Forest model.
+- **EM_Disaggregate**: Perform EM and save dataframe to Rds.
 
 #### Step 7: Create Grids to divide dataset into 3 subset: Train-Validate-Test
 Create Sampling Grids (with large resolution: 200, 300, 400, 500km). One of these Grids will be used for sampling 3 subsets: Training, Validating, and Testing (in Python.
@@ -136,25 +140,41 @@ Create Sampling Grids (with large resolution: 200, 300, 400, 500km). One of thes
 <br/> This script requires Calibrated FOI TIF map ([Step 2](#step-2-reprojectaggregateresample-cropped-tif-files)) and **EM_Imputed_Features_Study.Rds** ([Step 6](#step-6-perform-em-to-disaggregate-foi-values)). We need the extent CRS from the TIF and the coordinates of pixels from the Study dataframe.
 
 **Output**
-<br/> Grids CSV will be created in **_Generate/Grids_CSV/_** folder. This CSV will have 3 columns: x-y coordinates, and the Grid index of each pixel. Grid index indicates which Grid in which the pixel lies.
+<br/> Grids CSV, named as **Grid_[resolution]_[resolution].csv**, will be created in **_Generate/Grids_CSV/_** folder. This CSV will have 3 columns: x-y coordinates, and the Grid index of each pixel. Grid index indicates which Grid in which the pixel lies.
 
 **Function**
 - **Create_Sampling_Grids**: This script will need the extent (coordinates limitation) of a calibrated FOI map and the coordinates of all pixels in that map. The result will be a dataframe containing 3 columns: x, y (coordinates), and grids index. 
 
 #### Step 8: Train the Random Forest Model
-This step need to be done by Python. Comparing with R, Python can train the RF model much faster and requires less memory than R.
+This step need to be done by Python. Comparing with R, Python can train the RF model much faster and requires less memory than R. Since this step will run on Python, **_all of the input data need to be converted to CSV files_**. You can use the supporting function [**Dataframe_To_CSV**](#supporting-functions) to convert Rds files into CSV files. Default setting will store the result in **_Generate/Python_CSV/_** folder.
+ 
+**Input**
+<br/> This step requires Sampling Grid csv file, **EM_Imputed_Features_Study.Rds** from [step 7](#step-7-create-grids-to-divide-dataset-into-3-subset-train-validate-test), and **Imputed_Features_Endemic.Rds** from [step 4](#step-4-use-randomforestsrc-to-run-the-imputation-random-forest-not-the-prediction-model). You have to convert 2 Rds files into CSV format before running the training script.
+
+**Output**
+<br/> All the result files will be saved at **_Generate/Python_Export/_** folder. The result includes **Model**, **Grid index** indicating which pixels will be in Training-Validating-Testing set, **R-squared result** on Training and Validating set, **Endemic FOI** predicted by the model, **Variable important** of each feature. 
+
+**Function**
 - **Train_Model_RandomForest.py**: Sample which sampling grids will be used for training, validating, and testing. Then it will train the RF model and save the result, accuracy, variable importance, ... to CSV files (We can use R to plot these files later). 
-- **Plot_Sampling_Grids.py**: Plot and color Sampling Grids based on their subset (Which Grids are used for Training, Validating and Testing?). The Training, Validating, and Testing Grids are created after you run **_Train_Model_RandomForest.py_**.
 
-#### Step 9: Plot the result
-Basically, this is not a complicated step. Based on your wishes, you can plot the generated files from the above steps (EM, RF model, variable importance, ...). Here I just provided some simple examples of visualization.
+#### Step 9: Plot the feature importance
+Basically, this is not a complicated step. Based on your wishes, you can plot the generated files from the above steps (EM, RF model, variable importance, ...). Here I just provided a simple example to plot feature importance produced after running Random Forest ([Step 8](#step-8-train-the-random-forest-model)).
 
+**Input**
+<br/> This script will read the **Variable important** produced in [Step 8](#step-8-train-the-random-forest-model) and plot 2 figures. The first figure is about feature importance values and their standard deviation. The second figure is about feature importance and their IQR range. 
+
+**Output**
+<br/> 2 Figures named **Feature_Importance_Std.png** and **Feature_Importance_IQR.png** will be saved in **_Generate/Python_Export/Figures/_** 
+
+**Function**
+- **Plot_Feature_Importance**: reads the Variable important csv file and saves 2 figures.
 
 ### Supporting Functions  
 - **Create_Raster_From_Dataframe**: This simple script provides a way how to create a raster (map) as a TIF file from a dataframe (RDS, or CSV). The dataframe has 3 columns: x, y (coordinates of a pixel), values (values that we want to visualize in a map).
 - **Calculate_Missing_Portion_Features**: Find the missing portion of each column in a dataframe (can use this to find missing portion of each feature in the original dataframe, original means before imputing step)
 - **Dataframe_To_CSV**: This simple script provides a way how to convert Rds (dataframe) to csv files so that Python can read the data to run Random Forest.
 - **Plot_Correlation_Matrix**: Plot the correlation coefficient between features and the FOI values. Can use this for choosing a feature that have strong positive (negative) relationship with FOI and use that feature in [**EM_Disaggregation**](#step-6-perform-em-to-disaggregate-foi-values). The input can plot the correlation matrix based on Overlay Adjustment dataframe (main reason), or based on EM Disaggregation dataframe. The second option can only run after you ran the [EM Step](#step-6-perform-em-to-disaggregate-foi-values).
+- **Sampling_Many Grids.py**: This script will generate Train-Validate-Test sets many times, which will be used to train many random forest models. But in this scope, we only train 1 random forest model. **_Therefore we will not use this function_**.
 
 ## PART 2. GENERATE CASES 
 This folder includes scripts, Data folder and Generate folder.
