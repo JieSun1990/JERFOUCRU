@@ -95,15 +95,15 @@ Random Forest also provide the imputation algorithm. To make it independent with
 <br/>After we imputed missing values for the dataframe representing entire endemic areas, we extracted Study Catchment Area dataframe. This Study dataframe only contains pixels that have FOI values, which were obtained by fitting catalytic model to age-stratified cases data. 
 
 **Input**
-<br/> We will use Random Forest to impute the missing values in the gathered dataframe from Step 3. Note that we will remove the FOI column during the imputation step to make features not bias to the FOI values.
+<br/> We will use Random Forest to impute the missing values in the gathered dataframe from [Step 3](#step-3-create-a-dataframe-including-all-information-of-calibrated-tif-files). Note that we will remove the FOI column during the imputation step to make features not bias to the FOI values.
 
 **Output**
 <br/> The imputed dataframe named **Imputed_Features_Endemic.Rds**, and **Imputed_Features_Study.Rds** will be created at **_Generate/Imputed_DF/_** folder. Besides, you may also find some **Rsq** Rds files in this folder. Thesee **Rsq** is the result of the function **Try_Imputation_RF**.
-<br/> Figures produced by **Plot_Try_Imputation_RF** function will be in **_Generate/Imputed_Figures/_**
+<br/> Figures produced by **Plot_Try_Imputation_RF** function will be in **_Generate/Imputed_Figures/_**.
 
 **Functions**
-- **Imputation_RF**: Run the imputation Random Forest Model to impute missing values in each features. Since this is an extremely intensive task, you should run it on the server **_(Not yet included)_**
-- **Try_Imputation_RF**: Try to evaluate the imputation of RF by creating pseudo-NA data. Some of non-NA positions at each feature will be assigned NA, then run the RF to impute these values again. We will use R-squared to evaluate the accuracy of the imputation RF. We reccommend that only try to impute and evaluate on a small set of data on your local machine (1000 samples with 20% or 50% pseudo missing).
+- **Imputation_RF**: Run the imputation Random Forest Model to impute missing values in each features. Since this is an extremely intensive task, you should run it on the server.
+- **Try_Imputation_RF** (This function is not related to **Imputation_RF**): Try to evaluate the imputation of RF by creating pseudo-NA data. Some of non-NA positions at each feature will be assigned NA, then run the RF to impute these values again. We will use R-squared to evaluate the accuracy of the imputation RF. We reccommend that only try to impute and evaluate on a small set of data on your local machine (1000 samples with 20% or 50% pseudo missing).
 - **Plot_Try_Imputation_RF**: Plot the R-squared result of **Try_Imputaion_RF** function. You can also compare the result in 2 scenarios: 20% missing and 50% missing.
 - **Extract_Study_Dataframe**: Extract Study Catchment Area dataframe from imputed Endemic data frame.
 
