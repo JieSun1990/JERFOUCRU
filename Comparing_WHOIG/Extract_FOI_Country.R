@@ -1,5 +1,5 @@
 # NOTE #
-# Extract FOI of entire map based on their countries and compare with WHO-IG
+# Extract FOI of entire map based on their countries and compare with WHO-IG --> Mapping FOI distribution is stored in the variable result.country
 # Visualize in both density and boxplot
 # Note that WHO-IG dont have HKG (may be included in CHN)
 # Plot and save file
@@ -19,6 +19,7 @@ setwd(script.dir)
 
 # Create folder to store the result (will show warnings if the folder already exists --> but just warning, no problem)
 dir.create(file.path('Generate'), showWarnings = TRUE)
+Savepath <- 'Generate/'
 
 LinkData <- '../Generate_Cases/' # Data folder is from the Generate_Cases part
 
@@ -27,7 +28,7 @@ Extract_Values_Country <- function(DF_Vals, DF_Coords, Index){
   # DF_Vals: Dataframe containing values in entire map
   # DF_Coords: Dataframe containing pixel's index indicating which country it belongs to
   # Index: Name of index in DF_Coords
-  # Index + DF_Coords has to match
+  # Index + DF_Coords have to match
   # Coords in DF_Vals + DF_Coords have to match
   
   result <- vector('list', length(Index))
@@ -58,13 +59,15 @@ FOI_Estimated <- FOI_Estimated[,-1]
 Country_Index <- readRDS(paste0(LinkData, "Generate/Country_Index.Rds")) # index of countries
 Coord_Regions_Final <- readRDS(paste0(LinkData, "Generate/Coord_Regions_Final.Rds")) # country index of each pixel
 
-##### Extract Country #####
+##### Extract FOI distribution for each Country #####
 result.country <- Extract_Values_Country(FOI_Estimated, Coord_Regions_Final, Country_Index)
 # Fix Low.NPL and High.NPL
 result.country$Low.NPL <- c(result.country$Low.NPL, result.country$High.NPL)
 names(result.country)[17] <- 'NPL'
 result.country$MAC <- NULL
 result.country$High.NPL <- NULL
+
+saveRDS(result.country, paste0(Savepath, 'Mapping_FOI_Distribution_Countries.Rds'))
 
 ##### Compare to VIMC Posterior: Only some countries required by VIMC #####
 # LinkData <- '~/DuyNguyen/RProjects/Rstan_Quan/Result Posterior/Dec06/'
