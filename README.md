@@ -5,6 +5,7 @@ The entire project is divided into 3 parts
 1. [**Training Random Forest**](#part-1-training-random-forest): This part includes functions to preprocess data (adjust CRS, calibrate coordinates, ...), create train-validate-test set, perform Overlay and EM disaggregate, training model (on python), and other supporting functions to visualize
 2. [**Generate Cases**](#part-2-generate-cases): This part includes functions to generate cases at pixel levels and country-wide levels. It also contains functions to adjust the population data (from the mapping to match with UN data)
 3. [**Comparing with WHO Incidence Grouping (WHO-IG)**](#part-3-comparing-with-who-incidence-grouping): The last part comprises functions visualizing the cases (or population, etc) between RF and WHO-IG data. This part also includes how to extract FOI distribution for each country from Mapping approach through the function **Extract_FOI_Country.R**
+4. **Writing Documents** folder includes the document about the Data description and the summary of the workflow (just for the reference)
 
 Each folder will have similar structure:
 1. **Script** files: Code
