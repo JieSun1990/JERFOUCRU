@@ -14,6 +14,7 @@
 # However, Quan did stored his parameters for these values -->  we can used this to compared with Quan
 # ---- #
 
+cat('===== START [Generate_Cases_Dataframe.R] =====\n')
 
 # Get directory of the script (this part only work if source the code, wont work if run directly in the console)
 # This can be set manually !!!
@@ -115,3 +116,5 @@ for (i in 3 : ncol(df.casesage)){
   df <- df.casesage[ ,c(1, 2, i)]
   saveRDS(df, paste0('Generate/Cases/Cases_', colnames(df.casesage)[i], '.Rds'))
 }
+
+cat('===== FINISH [Generate_Cases_Dataframe.R] =====\n')

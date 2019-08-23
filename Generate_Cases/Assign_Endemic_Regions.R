@@ -7,6 +7,8 @@ library(sp)
 library(raster)
 library(rgdal)
 
+cat('===== START [Assign_Endemic_Regions.R] =====\n')
+
 # Get directory of the script (this part only work if source the code, wont work if run directly in the console)
 # This can be set manually !!!
 script.dir <- dirname(sys.frame(1)$ofile)
@@ -67,3 +69,5 @@ if(length(idx_non_regions) > 0){
 }
 saveRDS(df.foi, 'Generate/Coord_Regions_Final.Rds') # index of each pixel (dataframe with 3 columns: x, y (coordinates), regions (index))
 saveRDS(countries, 'Generate/Country_Index.Rds') # label of index (index = 1 --> country 'AUS', ...)
+
+cat('===== FINISH [Assign_Endemic_Regions.R] =====\n')

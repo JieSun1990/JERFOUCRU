@@ -3,6 +3,8 @@
 # The result will be age-distributed population in the year 2015 at each countries (total 25 countries)
 ### ---- ###
 
+cat('===== START [Extract_Age_Distribution_Population.R] =====\n')
+
 # Get directory of the script (this part only work if source the code, wont work if run directly in the console)
 # This can be set manually !!!
 script.dir <- dirname(sys.frame(1)$ofile)
@@ -46,3 +48,5 @@ for (country in countries_unique){
 }
 
 saveRDS(pop_convert, 'Generate/Naive_pop_24ende_2015_Country.Rds')
+
+cat('===== FINISH [Extract_Age_Distribution_Population.R] =====\n')

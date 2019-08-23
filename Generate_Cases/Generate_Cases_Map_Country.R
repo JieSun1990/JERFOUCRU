@@ -7,6 +7,8 @@ library(sp)
 library(raster)
 library(rgdal)
 
+cat('===== START [Generate_Cases_Map_Country.R] =====\n')
+
 # Get directory of the script (this part only work if source the code, wont work if run directly in the console)
 # This can be set manually !!!
 script.dir <- dirname(sys.frame(1)$ofile)
@@ -92,3 +94,5 @@ writeOGR(region.shp, ".", "Generate/Cases_SHP/Total_Cases_SHP", driver="ESRI Sha
 #     idx <- which(rfdata$Country == country)
 #     compare$rf[idx.country] <- rfdata$Cases[idx]
 # }
+
+cat('===== FINISH [Generate_Cases_Map_Country.R] =====\n')

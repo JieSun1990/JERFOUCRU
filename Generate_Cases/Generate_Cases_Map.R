@@ -7,6 +7,8 @@
 library(sp)
 library(raster)
 
+cat('===== START [Generate_Cases_Map.R] =====\n')
+
 # Get directory of the script (this part only work if source the code, wont work if run directly in the console)
 # This can be set manually !!!
 script.dir <- dirname(sys.frame(1)$ofile)
@@ -41,3 +43,5 @@ ListFiles <- list.files(LinkData)
     Namefile = paste0('Generate/Cases_TIF/Cases_', colnames(df)[3])
     writeRaster(rasterdf, Namefile, overwrite = TRUE, format = "GTiff")
 # }
+
+cat('===== FINISH [Generate_Cases_Map.R] =====\n')

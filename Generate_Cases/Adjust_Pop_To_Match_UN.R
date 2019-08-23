@@ -4,6 +4,8 @@
 # ratio = alternative / Duy --> adjusted pop = Duy * ratio
 ### ---- ###
 
+cat('===== START [Adjust_Pop_To_Match_UN.R] =====\n')
+
 # Get directory of the script (this part only work if source the code, wont work if run directly in the console)
 # This can be set manually !!!
 script.dir <- dirname(sys.frame(1)$ofile)
@@ -194,3 +196,5 @@ for (i in 1 : length(Country_Index)){
 }
 ##### SAVE #####
 saveRDS(df.pop, 'Generate/Adjusted_Pop_Map.Rds')
+
+cat('===== FINISH [Adjust_Pop_To_Match_UN.R] =====\n')
